@@ -4,75 +4,46 @@ import (
 	"image/color"
 
 	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/hajimehoshi/ebiten/v2/vector"
+
+	"github.com/programatta/spaceinvaders/internal"
 )
 
-type Game struct{}
+type Game struct {
+	cannon *internal.Cannon
+}
 
 // Implementación de la interface esperada por ebiten.
 func (g *Game) Update() error {
-	if ebiten.IsKeyPressed(ebiten.KeyArrowRight) {
-		cannonPosX++
-	} else if ebiten.IsKeyPressed(ebiten.KeyArrowLeft) {
-		cannonPosX--
-	}
+	g.cannon.ProcessKeyEvents()
 
-	if cannonPosX <= 0 {
-		cannonPosX = 0
-	} else if cannonPosX >= float32(640-spriteCannon.Bounds().Dx()) {
-		cannonPosX = float32(640 - spriteCannon.Bounds().Dx())
-	}
+	g.cannon.Update()
+
 	return nil
 }
 
 func (g *Game) Draw(screen *ebiten.Image) {
 	screen.Fill(color.RGBA{0x03, 0x04, 0x5e, 0xFF})
-	vector.DrawFilledRect(screen, 100, 100, 120, 120, color.RGBA{0, 255, 0, 255}, true)
 
-	//sprite cañón.
-	opCannon := &ebiten.DrawImageOptions{}
-	opCannon.GeoM.Translate(float64(cannonPosX), 300)
-	screen.DrawImage(spriteCannon, opCannon)
+	g.cannon.Draw(screen)
 }
 
 func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeight int) {
 	return outsideWidth, outsideHeight
 }
 
-var spriteCannon *ebiten.Image
-var cannonPosX float32 = 300
-
 func main() {
 	ebiten.SetWindowSize(640, 480)
 	ebiten.SetWindowTitle("Juego")
 
-	spriteCannon = SpriteFromArray(spriteDataCannon, 1, color.RGBA{0, 255, 0, 255})
+	spriteCannon := internal.SpriteFromArray(spriteDataCannon, 1, color.RGBA{0, 255, 0, 255})
 
 	game := &Game{}
+	game.cannon = internal.NewCannon(300, 300, spriteCannon)
+
 	err := ebiten.RunGame(game)
 	if err != nil {
 		panic(err)
 	}
-}
-
-func SpriteFromArray(data [][]int, pixelSize int, colorOn color.Color) *ebiten.Image {
-	h := len(data)
-	w := len(data[0])
-	img := ebiten.NewImage(w*pixelSize, h*pixelSize)
-
-	for y := 0; y < h; y++ {
-		for x := 0; x < w; x++ {
-			if data[y][x] == 1 {
-				rect := ebiten.NewImage(pixelSize, pixelSize)
-				rect.Fill(colorOn)
-
-				op := &ebiten.DrawImageOptions{}
-				op.GeoM.Translate(float64(x*pixelSize), float64(y*pixelSize))
-				img.DrawImage(rect, op)
-			}
-		}
-	}
-	return img
 }
 
 var spriteDataCannon = [][]int{
