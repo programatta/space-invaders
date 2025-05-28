@@ -1,5 +1,7 @@
 # Paso a paso para la construcción del juego.
-Se presenta a continuación un tutorial paso a paso indicando como se ha realizado el juego. También puede explorar las ramas `step-*` para ver el código en cada fase del desarrollo.
+Este documento describe el desarrollo completo del clon de **Space Invaders** implementado en Go con **Ebiten**, desde cero hasta su versión final.
+
+Cada paso incluye explicaciones técnicas, ejemplos de código, y una rama específica (`step-*`) en el repositorio para ver el estado del proyecto en ese momento.
 
 |Paso|Descripcion|Rama|Ver|
 |----|-----------|----|---|
