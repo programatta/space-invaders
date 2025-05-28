@@ -90,7 +90,7 @@ func main() {
 }
 ~~~
 
-Puede consultar el código de este paso en la rama [step-02-cannon_y_movimiento_1](https://github.com/programatta/space-invaders/tree/step-02-canon_y_movimiento_1).
+Puede consultar el código de este paso en la rama [step-02-cannon_y_movimiento_1](https://github.com/programatta/space-invaders/tree/step-02-cannon_y_movimiento_1).
 
 ### Dibujando una imagen.
 **Ebiten** permite leer texturas extermas al binario, leer texturas embebidas en el binario (son texturas externas que se añaden al binario durante la compilación a través de embed) o crear las imágenes en base a un array de dos dimensiones en tiempo de ejecución, que es lo que se aplica eneste tutorial.
@@ -280,7 +280,7 @@ var spriteDataCannon = [][]int{
 
 El tamaño del sprite del cañón se ve pequeño, pero lo vamos a ajustar mas adelante al establecer el **layout**.
 
-Puede consultar el código de este paso en la rama [step-02-cannon_y_movimiento_2](https://github.com/programatta/space-invaders/tree/step-02-canon_y_movimiento_2).
+Puede consultar el código de este paso en la rama [step-02-cannon_y_movimiento_2](https://github.com/programatta/space-invaders/tree/step-02-cannon_y_movimiento_2).
 
 
 ## Moviendo el cañon. Eventos de teclado.
@@ -340,7 +340,7 @@ Al presionar el cursor derecho o izquierdo, se incrementa o decrementa la posici
 
 Se hace de esta manera, ya que el origen de coordenadas de las imagenes están en la esquina superior izquierda, entonces al ir hacia la izquierda, simplemente verificamos con 0, pero al ir hacia la derecha, verificamos la posición del sprite junto con su ancho para evitar que supere el ancho de la pantalla.
 
-Puede consultar el código de este paso en la rama [step-02-cannon_y_movimiento_3](https://github.com/programatta/space-invaders/tree/step-02-canon_y_movimiento_3).
+Puede consultar el código de este paso en la rama [step-02-cannon_y_movimiento_3](https://github.com/programatta/space-invaders/tree/step-02-cannon_y_movimiento_3).
 
 
 
@@ -463,4 +463,4 @@ func main() {
 
 Con esto, hemos logrado mover el cañón, encapsular su lógica, y dejar preparada la estructura para continuar desarrollando el juego de forma limpia y escalable.
 
-Puede consultar el código de este paso en la rama [step-02-cannon_y_movimiento_4](https://github.com/programatta/space-invaders/tree/step-02-canon_y_movimiento_4).
+Puede consultar el código de este paso en la rama [step_02-cannon_y_movimiento_4](https://github.com/programatta/space-invaders/tree/step_02-canon_y_movimiento_4).
