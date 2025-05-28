@@ -463,4 +463,4 @@ func main() {
 
 Con esto, hemos logrado mover el cañón, encapsular su lógica, y dejar preparada la estructura para continuar desarrollando el juego de forma limpia y escalable.
 
-Puede consultar el código de este paso en la rama [step_02-cannon_y_movimiento_4](https://github.com/programatta/space-invaders/tree/step_02-canon_y_movimiento_4).
+Puede consultar el código de este paso en la rama [step_02-cannon_y_movimiento_4](https://github.com/programatta/space-invaders/tree/step_02-cannon_y_movimiento_4).
