@@ -40,7 +40,7 @@ Este proyecto puede ayudarte a aprender:
 * [Uso de Docker](docs/dockerenvironment.md).
 * [Compilación](docs/compilation.md).
 * [Recursos de sonido y fuente](docs/resources.md).
-* Cómo se hizo el juego paso a paso.
+* [Cómo se hizo el juego paso a paso](docs/paso_a_paso/paso_a_paso.md).
 
 
 ## 🙋 Autor.
