@@ -11,6 +11,17 @@ type Game struct{}
 
 // Implementación de la interface esperada por ebiten.
 func (g *Game) Update() error {
+	if ebiten.IsKeyPressed(ebiten.KeyArrowRight) {
+		cannonPosX++
+	} else if ebiten.IsKeyPressed(ebiten.KeyArrowLeft) {
+		cannonPosX--
+	}
+
+	if cannonPosX <= 0 {
+		cannonPosX = 0
+	} else if cannonPosX >= float32(640-spriteCannon.Bounds().Dx()) {
+		cannonPosX = float32(640 - spriteCannon.Bounds().Dx())
+	}
 	return nil
 }
 
@@ -20,7 +31,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 
 	//sprite cañón.
 	opCannon := &ebiten.DrawImageOptions{}
-	opCannon.GeoM.Translate(300, 300)
+	opCannon.GeoM.Translate(float64(cannonPosX), 300)
 	screen.DrawImage(spriteCannon, opCannon)
 }
 
@@ -29,6 +40,7 @@ func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeigh
 }
 
 var spriteCannon *ebiten.Image
+var cannonPosX float32 = 300
 
 func main() {
 	ebiten.SetWindowSize(640, 480)
