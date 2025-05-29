@@ -50,8 +50,8 @@ func (c *Cannon) Update() error {
 	c.posX += c.dirX
 	if c.posX <= 0 {
 		c.posX = 0
-	} else if c.posX+float32(c.sprite.Bounds().Dx()) >= float32(640) {
-		c.posX = float32(640) - float32(c.sprite.Bounds().Dx())
+	} else if c.posX+float32(c.sprite.Bounds().Dx()) >= float32(DesignWidth) {
+		c.posX = float32(DesignWidth) - float32(c.sprite.Bounds().Dx())
 	}
 	return nil
 }

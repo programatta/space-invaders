@@ -14,13 +14,23 @@ type Notifier interface {
 type Game struct {
 	cannon  *Cannon
 	bullets []*Bullet
+	bunkers []*Bunker
 }
 
 func NewGame() *Game {
 	spriteCannon := SpriteFromArray(spriteDataCannon, 1, color.RGBA{0, 255, 0, 255})
+	spriteBunker := SpriteFromArray(spriteDataBunker, 1, color.RGBA{0, 255, 0, 255})
 
 	game := &Game{}
-	game.cannon = NewCannon(100, 150, spriteCannon, game)
+	game.cannon = NewCannon(float32(0), float32(DesignHeight-10), spriteCannon, game)
+
+	bunker1 := NewBunker(float32(27), float32(DesignHeight-40), spriteBunker)
+
+	space := float32(bunker1.sprite.Bounds().Dx())
+	bunker2 := NewBunker(27+space+20, float32(DesignHeight-40), spriteBunker)
+	bunker3 := NewBunker(27+2*(space+20), float32(DesignHeight-40), spriteBunker)
+	bunker4 := NewBunker(27+3*(space+20), float32(DesignHeight-40), spriteBunker)
+	game.bunkers = []*Bunker{bunker1, bunker2, bunker3, bunker4}
 
 	return game
 }
@@ -49,10 +59,14 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	for _, bullet := range g.bullets {
 		bullet.Draw(screen)
 	}
+
+	for _, bunker := range g.bunkers {
+		bunker.Draw(screen)
+	}
 }
 
 func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeight int) {
-	return outsideWidth / 3, outsideHeight / 3
+	return DesignWidth, DesignHeight
 }
 
 // Implementación de la interface Notifier
@@ -78,4 +92,23 @@ var spriteDataBullet = [][]int{
 	{1},
 }
 
+var spriteDataBunker = [][]int{
+	{0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0},
+	{0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0},
+	{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+	{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+	{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+	{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+	{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+	{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+	{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+	{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+	{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+}
+
 const dt float32 = float32(1.0 / 60)
+
+const WindowWidth int = 642
+const WindowHeight int = 642
+const DesignWidth int = WindowWidth / 3
+const DesignHeight int = WindowHeight / 3
