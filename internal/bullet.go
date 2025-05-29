@@ -16,7 +16,11 @@ func NewBullet(posX, posY float32, sprite *ebiten.Image) *Bullet {
 	}
 }
 
-func (b *Bullet) Update() {}
+func (b *Bullet) Update() {
+	if b.posY+float32(b.sprite.Bounds().Dy()) > 0 {
+		b.posY -= 1
+	}
+}
 
 func (b *Bullet) Draw(screen *ebiten.Image) {
 	opBullet := &ebiten.DrawImageOptions{}

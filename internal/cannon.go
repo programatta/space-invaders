@@ -9,13 +9,15 @@ type Cannon struct {
 	posX   float32
 	posY   float32
 	dirX   float32
+	notify Notifier
 }
 
-func NewCannon(posX, posY float32, sprite *ebiten.Image) *Cannon {
+func NewCannon(posX, posY float32, sprite *ebiten.Image, notify Notifier) *Cannon {
 	return &Cannon{
 		sprite: sprite,
 		posX:   posX,
 		posY:   posY,
+		notify: notify,
 	}
 }
 
@@ -25,6 +27,10 @@ func (c *Cannon) ProcessKeyEvents() {
 		c.dirX = 1
 	} else if ebiten.IsKeyPressed(ebiten.KeyArrowLeft) {
 		c.dirX = -1
+	}
+
+	if ebiten.IsKeyPressed(ebiten.KeySpace) {
+		c.notify.OnCreateCannonBullet(c.posX+6, c.posY)
 	}
 }
 
