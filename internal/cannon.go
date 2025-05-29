@@ -5,19 +5,22 @@ import (
 )
 
 type Cannon struct {
-	sprite *ebiten.Image
-	posX   float32
-	posY   float32
-	dirX   float32
-	notify Notifier
+	sprite   *ebiten.Image
+	posX     float32
+	posY     float32
+	dirX     float32
+	notify   Notifier
+	canFired bool
+	time     float32
 }
 
 func NewCannon(posX, posY float32, sprite *ebiten.Image, notify Notifier) *Cannon {
 	return &Cannon{
-		sprite: sprite,
-		posX:   posX,
-		posY:   posY,
-		notify: notify,
+		sprite:   sprite,
+		posX:     posX,
+		posY:     posY,
+		notify:   notify,
+		canFired: true,
 	}
 }
 
@@ -29,12 +32,21 @@ func (c *Cannon) ProcessKeyEvents() {
 		c.dirX = -1
 	}
 
-	if ebiten.IsKeyPressed(ebiten.KeySpace) {
+	if c.canFired && ebiten.IsKeyPressed(ebiten.KeySpace) {
+		c.canFired = false
 		c.notify.OnCreateCannonBullet(c.posX+6, c.posY)
 	}
 }
 
 func (c *Cannon) Update() error {
+	if !c.canFired {
+		c.time += dt
+		if c.time >= 0.35 {
+			c.canFired = true
+			c.time = 0
+		}
+	}
+
 	c.posX += c.dirX
 	if c.posX <= 0 {
 		c.posX = 0

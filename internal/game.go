@@ -1,8 +1,8 @@
 package internal
 
 import (
-	"fmt"
 	"image/color"
+	"slices"
 
 	"github.com/hajimehoshi/ebiten/v2"
 )
@@ -30,10 +30,15 @@ func (g *Game) Update() error {
 	g.cannon.ProcessKeyEvents()
 
 	g.cannon.Update()
-	fmt.Printf("\nBullets: %d", len(g.bullets))
 	for _, bullet := range g.bullets {
 		bullet.Update()
 	}
+	if len(g.bullets) > 0 {
+		g.bullets = slices.DeleteFunc(g.bullets, func(bullet *Bullet) bool {
+			return bullet.CanRemove()
+		})
+	}
+
 	return nil
 }
 
@@ -72,3 +77,5 @@ var spriteDataBullet = [][]int{
 	{1},
 	{1},
 }
+
+const dt float32 = float32(1.0 / 60)
