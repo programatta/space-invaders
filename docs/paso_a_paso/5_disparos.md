@@ -217,7 +217,7 @@ Y en el método **Update** el disparo debe actualizarse para ir desplazandose ha
 if g.bullet != nil {
   g.bullet.Update()
 }
-~~
+~~~
 
 Y de la misma forma en **Draw**:
 
