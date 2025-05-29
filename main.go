@@ -10,6 +10,7 @@ import (
 
 type Game struct {
 	cannon *internal.Cannon
+	bullet *internal.Bullet
 }
 
 // Implementación de la interface esperada por ebiten.
@@ -25,10 +26,11 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	screen.Fill(color.RGBA{0x03, 0x04, 0x5e, 0xFF})
 
 	g.cannon.Draw(screen)
+	g.bullet.Draw(screen)
 }
 
 func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeight int) {
-	return outsideWidth, outsideHeight
+	return outsideWidth / 3, outsideHeight / 3
 }
 
 func main() {
@@ -36,9 +38,11 @@ func main() {
 	ebiten.SetWindowTitle("Juego")
 
 	spriteCannon := internal.SpriteFromArray(spriteDataCannon, 1, color.RGBA{0, 255, 0, 255})
+	spriteBullet := internal.SpriteFromArray(spriteDataBullet, 1, color.RGBA{0, 255, 0, 255})
 
 	game := &Game{}
-	game.cannon = internal.NewCannon(300, 300, spriteCannon)
+	game.cannon = internal.NewCannon(100, 150, spriteCannon)
+	game.bullet = internal.NewBullet(106, 146, spriteBullet)
 
 	err := ebiten.RunGame(game)
 	if err != nil {
@@ -55,4 +59,9 @@ var spriteDataCannon = [][]int{
 	{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
 	{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
 	{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+}
+
+var spriteDataBullet = [][]int{
+	{1},
+	{1},
 }
