@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"fmt"
 	"image/color"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -11,8 +12,8 @@ type Notifier interface {
 }
 
 type Game struct {
-	cannon *Cannon
-	bullet *Bullet
+	cannon  *Cannon
+	bullets []*Bullet
 }
 
 func NewGame() *Game {
@@ -29,8 +30,9 @@ func (g *Game) Update() error {
 	g.cannon.ProcessKeyEvents()
 
 	g.cannon.Update()
-	if g.bullet != nil {
-		g.bullet.Update()
+	fmt.Printf("\nBullets: %d", len(g.bullets))
+	for _, bullet := range g.bullets {
+		bullet.Update()
 	}
 	return nil
 }
@@ -39,8 +41,8 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	screen.Fill(color.RGBA{0x03, 0x04, 0x5e, 0xFF})
 
 	g.cannon.Draw(screen)
-	if g.bullet != nil {
-		g.bullet.Draw(screen)
+	for _, bullet := range g.bullets {
+		bullet.Draw(screen)
 	}
 }
 
@@ -51,7 +53,8 @@ func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeigh
 // Implementación de la interface Notifier
 func (g *Game) OnCreateCannonBullet(posX, posY float32) {
 	spriteBullet := SpriteFromArray(spriteDataBullet, 1, color.RGBA{0, 255, 0, 255})
-	g.bullet = NewBullet(posX, posY, spriteBullet)
+	bullet := NewBullet(posX, posY, spriteBullet)
+	g.bullets = append(g.bullets, bullet)
 }
 
 var spriteDataCannon = [][]int{
