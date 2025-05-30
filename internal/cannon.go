@@ -5,7 +5,7 @@ import (
 )
 
 type Cannon struct {
-	sprite   *ebiten.Image
+	sprite   Sprite
 	posX     float32
 	posY     float32
 	dirX     float32
@@ -14,7 +14,7 @@ type Cannon struct {
 	time     float32
 }
 
-func NewCannon(posX, posY float32, sprite *ebiten.Image, notify Notifier) *Cannon {
+func NewCannon(posX, posY float32, sprite Sprite, notify Notifier) *Cannon {
 	return &Cannon{
 		sprite:   sprite,
 		posX:     posX,
@@ -50,8 +50,8 @@ func (c *Cannon) Update() error {
 	c.posX += c.dirX
 	if c.posX <= 0 {
 		c.posX = 0
-	} else if c.posX+float32(c.sprite.Bounds().Dx()) >= float32(DesignWidth) {
-		c.posX = float32(DesignWidth) - float32(c.sprite.Bounds().Dx())
+	} else if c.posX+float32(c.sprite.Image.Bounds().Dx()) >= float32(DesignWidth) {
+		c.posX = float32(DesignWidth) - float32(c.sprite.Image.Bounds().Dx())
 	}
 	return nil
 }
@@ -59,5 +59,5 @@ func (c *Cannon) Update() error {
 func (c *Cannon) Draw(screen *ebiten.Image) {
 	opCannon := &ebiten.DrawImageOptions{}
 	opCannon.GeoM.Translate(float64(c.posX), float64(c.posY))
-	screen.DrawImage(c.sprite, opCannon)
+	screen.DrawImage(c.sprite.Image, opCannon)
 }
