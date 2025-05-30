@@ -13,6 +13,14 @@ type Bunker struct {
 }
 
 func NewBunker(posX, posY float32, sprite Sprite) *Bunker {
+	spriteDataBunker := make([][]int, len(sprite.Data))
+	for i := range sprite.Data {
+		spriteDataBunker[i] = make([]int, len(sprite.Data[i]))
+		copy(spriteDataBunker[i], sprite.Data[i])
+	}
+
+	sprite.Data = spriteDataBunker
+
 	return &Bunker{
 		sprite: sprite,
 		posX:   posX,
