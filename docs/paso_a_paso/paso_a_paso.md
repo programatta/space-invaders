@@ -8,6 +8,7 @@ Cada paso incluye explicaciones técnicas, ejemplos de código, y una rama espec
 |Introducción|Creación del módulo de juego, instalación de la librería y primera ventana | step-01-inicial|[▶️](./1_introduccion.md)|
 |Cañón y movimiento|Creación de sprite a partir de arrays 2D y movimiento de este | step-02-*|[▶️](./4_canon_y_movimiento.md)|
 |Disparos|Lógica de disparos (1 a la vez), se mueven verticalmente| step-03-*|[▶️](./5_disparos.md)|
+|Bunkers|Bloques protectores y colisiones| step-04-*|[▶️](./6_bunker.md)|
 
 > 🔔 **Ramas con asterisco**
 >
