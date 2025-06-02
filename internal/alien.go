@@ -11,6 +11,7 @@ type Alien struct {
 	lastDirX      float32
 	time          float32
 	notifier      Notifier
+	remove        bool
 }
 
 func NewAlien(posX, posY float32, sprite1, sprite2 Sprite, notifier Notifier) *Alien {
@@ -51,6 +52,21 @@ func (a *Alien) Draw(screen *ebiten.Image) {
 	spriteOptions.GeoM.Translate(float64(a.posX), float64(a.posY))
 
 	screen.DrawImage(a.sprites[a.currentSprite].Image, spriteOptions)
+}
+
+func (a *Alien) CanRemove() bool {
+	return a.remove
+}
+
+// Implementación de la interface Collider.
+func (a *Alien) Rect() (float32, float32, float32, float32) {
+	width := float32(a.sprites[a.currentSprite].Image.Bounds().Dx())
+	height := float32(a.sprites[a.currentSprite].Image.Bounds().Dy())
+	return a.posX, a.posY, width, height
+}
+
+func (a *Alien) OnCollide() {
+	a.remove = true
 }
 
 const speed float32 = 200

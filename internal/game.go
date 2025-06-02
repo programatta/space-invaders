@@ -72,12 +72,6 @@ func (g *Game) Update() error {
 		enemy.Update()
 	}
 
-	if len(g.bullets) > 0 {
-		g.bullets = slices.DeleteFunc(g.bullets, func(bullet *Bullet) bool {
-			return bullet.CanRemove()
-		})
-	}
-
 	//Colisiones.
 	for _, bullet := range g.bullets {
 		for _, bunker := range g.bunkers {
@@ -87,6 +81,40 @@ func (g *Game) Update() error {
 				}
 			}
 		}
+		for _, enemy := range g.enemies {
+			if g.checkCollision(bullet, enemy) {
+				bullet.OnCollide()
+				enemy.OnCollide()
+
+				//alienExplosionSprite, _ := g.spriteCreator.SpriteByName("alienExplosion")
+				//enemyX, enemyY := enemy.Position()
+				//explosion := NewExplosion(enemyX, enemyY, alienExplosionSprite, enemy.Color())
+				//g.explosions = append(g.explosions, explosion)
+				//g.score += uint32(enemy.Score())
+			}
+		}
+		if g.checkCollision(bullet, g.ufo) {
+			bullet.OnCollide()
+			g.ufo.OnCollide()
+
+			// ufoExplosionSprite, _ := g.spriteCreator.SpriteByName("ufoExplosion")
+			// ufoX, ufoY := g.ufo.Position()
+			// explosionUfo := NewExplosionUfo(ufoX, ufoY, ufoExplosionSprite, g.face, g.ufo.Score(), g)
+			// g.explosions = append(g.explosions, explosionUfo)
+			// g.score += uint32(g.ufo.Score())
+
+		}
+	}
+
+	if len(g.bullets) > 0 {
+		g.bullets = slices.DeleteFunc(g.bullets, func(bullet *Bullet) bool {
+			return bullet.CanRemove()
+		})
+	}
+	if len(g.enemies) > 0 {
+		g.enemies = slices.DeleteFunc(g.enemies, func(alien *Alien) bool {
+			return alien.CanRemove()
+		})
 	}
 
 	if g.newDirection != g.enemiesCurrentDir {
