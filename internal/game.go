@@ -21,6 +21,8 @@ type Game struct {
 	cannon        *Cannon
 	bullets       []*Bullet
 	bunkers       []*Bunker
+	ufo           *Ufo
+	enemies       []*Alien
 }
 
 func NewGame() *Game {
@@ -41,6 +43,12 @@ func NewGame() *Game {
 	bunker4 := NewBunker(27+3*(space+20), float32(DesignHeight-40), spriteBunker)
 	game.bunkers = []*Bunker{bunker1, bunker2, bunker3, bunker4}
 
+	ufoSprite, _ := spriteCreator.SpriteByName("ufo")
+	ufo := NewUfo(100, 5, ufoSprite)
+	game.ufo = ufo
+
+	enemies := createEnemies(spriteCreator)
+	game.enemies = enemies
 	return game
 }
 
@@ -74,6 +82,12 @@ func (g *Game) Update() error {
 func (g *Game) Draw(screen *ebiten.Image) {
 	screen.Fill(color.RGBA{0x03, 0x04, 0x5e, 0xFF})
 
+	g.ufo.Draw(screen)
+
+	for _, enemy := range g.enemies {
+		enemy.Draw(screen)
+	}
+
 	g.cannon.Draw(screen)
 	for _, bullet := range g.bullets {
 		bullet.Draw(screen)
@@ -102,6 +116,78 @@ func (g *Game) checkCollision(sourceObj, targetObj Collider) bool {
 	hasCollision := sx0 < tx0+tw && sx0+sw > tx0 && sy0 < ty0+th && sh+sy0 > ty0
 
 	return hasCollision
+}
+
+func createEnemies(spriteCreator *SpriteCreator) []*Alien {
+	enemies := []*Alien{}
+
+	squids := createSquids(11, 1, 11, 35, spriteCreator)
+	enemies = append(enemies, squids...)
+
+	crabs := createCrabs(11, 2, 10, 50, spriteCreator)
+	enemies = append(enemies, crabs...)
+
+	octopuses := createOctopuses(11, 2, 9, 80, spriteCreator)
+	enemies = append(enemies, octopuses...)
+
+	return enemies
+}
+
+func createCrabs(count, rows uint8, initX, initY float32, spriteCreator *SpriteCreator) []*Alien {
+	sprite1, _ := spriteCreator.SpriteByName("crab1")
+	sprite2, _ := spriteCreator.SpriteByName("crab2")
+	crabs := []*Alien{}
+
+	posX := initX
+	posY := initY
+	for i := range count * rows {
+		crab := NewAlien(posX, posY, sprite1, sprite2)
+		crabs = append(crabs, crab)
+		posX += float32(sprite1.Image.Bounds().Dx() + 6)
+		if i > 0 && (i+1)%count == 0 {
+			posX = initX
+			posY += float32(sprite1.Image.Bounds().Dy() + 5)
+		}
+	}
+	return crabs
+}
+
+func createOctopuses(count, rows uint8, initX, initY float32, spriteCreator *SpriteCreator) []*Alien {
+	sprite1, _ := spriteCreator.SpriteByName("octopus1")
+	sprite2, _ := spriteCreator.SpriteByName("octopus2")
+	octopuses := []*Alien{}
+
+	posX := initX
+	posY := initY
+	for i := range count * rows {
+		octopus := NewAlien(posX, posY, sprite1, sprite2)
+		octopuses = append(octopuses, octopus)
+		posX += float32(sprite1.Image.Bounds().Dx() + 5)
+		if i > 0 && (i+1)%count == 0 {
+			posX = initX
+			posY += float32(sprite1.Image.Bounds().Dy() + 5)
+		}
+	}
+	return octopuses
+}
+
+func createSquids(count, rows uint8, initX, initY float32, spriteCreator *SpriteCreator) []*Alien {
+	sprite1, _ := spriteCreator.SpriteByName("squid1")
+	sprite2, _ := spriteCreator.SpriteByName("squid2")
+	squids := []*Alien{}
+
+	posX := initX
+	posY := initY
+	for i := range count * rows {
+		squid := NewAlien(posX, posY, sprite1, sprite2)
+		squids = append(squids, squid)
+		posX += float32(sprite1.Image.Bounds().Dx() + 9)
+		if i > 0 && (i+1)%count == 0 {
+			posX = initX
+			posY += float32(sprite1.Image.Bounds().Dy())
+		}
+	}
+	return squids
 }
 
 const dt float32 = float32(1.0 / 60)
