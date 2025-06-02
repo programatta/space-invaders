@@ -7,19 +7,42 @@ type Alien struct {
 	currentSprite uint
 	posX          float32
 	posY          float32
+	currentDirX   float32
+	lastDirX      float32
 	time          float32
+	notifier      Notifier
 }
 
-func NewAlien(posX, posY float32, sprite1, sprite2 Sprite) *Alien {
+func NewAlien(posX, posY float32, sprite1, sprite2 Sprite, notifier Notifier) *Alien {
 	sprites := []Sprite{sprite1, sprite2}
-	return &Alien{sprites: sprites, posX: posX, posY: posY, currentSprite: 0, time: 0}
+	return &Alien{sprites: sprites, posX: posX, posY: posY, currentSprite: 0, time: 0, notifier: notifier}
+}
+
+func (a *Alien) ChangeDirection(currentDir float32) {
+	a.currentDirX = currentDir
 }
 
 func (a *Alien) Update() {
+	if a.lastDirX != a.currentDirX {
+		if a.lastDirX != 0 {
+			a.posY += 5
+		}
+		a.lastDirX = a.currentDirX
+	}
+
 	a.time += dt
 	if a.time >= 0.35 {
+		a.posX += speed * dt * a.currentDirX
 		a.currentSprite = (a.currentSprite + 1) % 2
 		a.time = 0
+	}
+
+	if a.posX+float32(a.sprites[a.currentSprite].Image.Bounds().Dx()) >= float32(DesignWidth) {
+		a.notifier.OnChangeDirection(-1)
+		a.posX = float32(DesignWidth) - float32(a.sprites[a.currentSprite].Image.Bounds().Dx())
+	} else if a.posX <= 0 {
+		a.notifier.OnChangeDirection(1)
+		a.posX = 0
 	}
 }
 
@@ -29,3 +52,5 @@ func (a *Alien) Draw(screen *ebiten.Image) {
 
 	screen.DrawImage(a.sprites[a.currentSprite].Image, spriteOptions)
 }
+
+const speed float32 = 200
