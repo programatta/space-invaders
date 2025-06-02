@@ -13,7 +13,10 @@ func NewUfo(posX, posY float32, sprite Sprite) *Ufo {
 }
 
 func (u *Ufo) Update() {
-
+	u.posX++
+	if u.posX >= float32(DesignWidth) {
+		u.posX = -100
+	}
 }
 
 func (u *Ufo) Draw(screen *ebiten.Image) {

@@ -44,7 +44,7 @@ func NewGame() *Game {
 	game.bunkers = []*Bunker{bunker1, bunker2, bunker3, bunker4}
 
 	ufoSprite, _ := spriteCreator.SpriteByName("ufo")
-	ufo := NewUfo(100, 5, ufoSprite)
+	ufo := NewUfo(-20, 5, ufoSprite)
 	game.ufo = ufo
 
 	enemies := createEnemies(spriteCreator)
@@ -60,6 +60,12 @@ func (g *Game) Update() error {
 	for _, bullet := range g.bullets {
 		bullet.Update()
 	}
+
+	g.ufo.Update()
+	for _, enemy := range g.enemies {
+		enemy.Update()
+	}
+
 	if len(g.bullets) > 0 {
 		g.bullets = slices.DeleteFunc(g.bullets, func(bullet *Bullet) bool {
 			return bullet.CanRemove()
