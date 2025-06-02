@@ -17,21 +17,22 @@ type Collider interface {
 }
 
 type Game struct {
-	cannon  *Cannon
-	bullets []*Bullet
-	bunkers []*Bunker
+	spriteCreator *SpriteCreator
+	cannon        *Cannon
+	bullets       []*Bullet
+	bunkers       []*Bunker
 }
 
 func NewGame() *Game {
-	spriteImgCannon := SpriteFromArray(spriteDataCannon, 1, color.RGBA{0, 255, 0, 255})
-	spriteCannon := Sprite{spriteImgCannon, spriteDataCannon}
-
-	spriteImgBunker := SpriteFromArray(spriteDataBunker, 1, color.RGBA{0, 255, 0, 255})
-	spriteBunker := Sprite{spriteImgBunker, spriteDataBunker}
+	spriteCreator := NewSpriteCreator()
 
 	game := &Game{}
+	game.spriteCreator = spriteCreator
+
+	spriteCannon, _ := spriteCreator.SpriteByName("cannon")
 	game.cannon = NewCannon(float32(0), float32(DesignHeight-10), spriteCannon, game)
 
+	spriteBunker, _ := spriteCreator.SpriteByName("bunker")
 	bunker1 := NewBunker(float32(27), float32(DesignHeight-40), spriteBunker)
 
 	space := float32(bunker1.sprite.Image.Bounds().Dx())
@@ -89,8 +90,7 @@ func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeigh
 
 // Implementación de la interface Notifier
 func (g *Game) OnCreateCannonBullet(posX, posY float32) {
-	spriteImageBullet := SpriteFromArray(spriteDataBullet, 1, color.RGBA{0, 255, 0, 255})
-	spriteBullet := Sprite{spriteImageBullet, spriteDataBullet}
+	spriteBullet, _ := g.spriteCreator.SpriteByName("bullet")
 	bullet := NewBullet(posX, posY, spriteBullet)
 	g.bullets = append(g.bullets, bullet)
 }
@@ -102,36 +102,6 @@ func (g *Game) checkCollision(sourceObj, targetObj Collider) bool {
 	hasCollision := sx0 < tx0+tw && sx0+sw > tx0 && sy0 < ty0+th && sh+sy0 > ty0
 
 	return hasCollision
-}
-
-var spriteDataCannon = [][]int{
-	{0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0},
-	{0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0},
-	{0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0},
-	{0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0},
-	{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-	{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-	{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-	{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-}
-
-var spriteDataBullet = [][]int{
-	{1},
-	{1},
-}
-
-var spriteDataBunker = [][]int{
-	{0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0},
-	{0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0},
-	{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-	{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-	{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-	{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-	{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-	{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-	{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-	{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-	{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
 }
 
 const dt float32 = float32(1.0 / 60)
