@@ -10,6 +10,7 @@ type Bunker struct {
 	sprite Sprite
 	posX   float32
 	posY   float32
+	remove bool
 }
 
 func NewBunker(posX, posY float32, sprite Sprite) *Bunker {
@@ -70,5 +71,9 @@ func (b *Bunker) Rect() (float32, float32, float32, float32) {
 }
 
 func (b *Bunker) OnCollide() {
+	b.remove = true
+}
 
+func (b *Bunker) CanRemove() bool {
+	return b.remove
 }

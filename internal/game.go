@@ -157,6 +157,16 @@ func (g *Game) Update() error {
 		}
 	}
 
+	//Colisines alien con bunker
+	for _, enemy := range g.enemies {
+		for _, bunker := range g.bunkers {
+			if g.checkCollision(enemy, bunker) {
+				bunker.OnCollide()
+				break
+			}
+		}
+	}
+
 	if len(g.bullets) > 0 {
 		g.bullets = slices.DeleteFunc(g.bullets, func(bullet *Bullet) bool {
 			return bullet.CanRemove()
@@ -170,6 +180,12 @@ func (g *Game) Update() error {
 	if len(g.explosions) > 0 {
 		g.explosions = slices.DeleteFunc(g.explosions, func(explosion Explosioner) bool {
 			return explosion.CanRemove()
+		})
+	}
+
+	if len(g.bunkers) > 0 {
+		g.bunkers = slices.DeleteFunc(g.bunkers, func(bunker *Bunker) bool {
+			return bunker.CanRemove()
 		})
 	}
 
