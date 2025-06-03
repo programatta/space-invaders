@@ -38,7 +38,7 @@ func (b *Bunker) Draw(screen *ebiten.Image) {
 	screen.DrawImage(b.sprite.Image, opBunker)
 }
 
-func (b *Bunker) DoDamage(damageX, damageY float32) bool {
+func (b *Bunker) DoDamage(damageX, damageY float32, dir int) bool {
 	damage := false
 	logX := int((damageX - b.posX))
 	logY := int((damageY - b.posY))
@@ -46,8 +46,14 @@ func (b *Bunker) DoDamage(damageX, damageY float32) bool {
 	if 0 <= logY && logY < b.sprite.Image.Bounds().Dy() {
 		if b.sprite.Data[logY][logX] != 0 {
 			b.sprite.Data[logY][logX] = 0
-			if logY-1 >= 0 {
-				b.sprite.Data[logY-1][logX] = 0
+			if dir > 0 {
+				if logY+1 < b.sprite.Image.Bounds().Dy()-1 {
+					b.sprite.Data[logY+1][logX] = 0
+				}
+			} else {
+				if logY-1 >= 0 {
+					b.sprite.Data[logY-1][logX] = 0
+				}
 			}
 			b.sprite.Image = SpriteFromArray(b.sprite.Data, 1, color.RGBA{0, 255, 0, 255})
 			damage = true

@@ -13,6 +13,7 @@ type Notifier interface {
 	OnCreateCannonBullet(posX, posY float32, color color.Color)
 	OnCreateAlienBullet(posX, posy float32, color color.Color)
 	OnResetUfo()
+	OnResetCannon()
 }
 
 type Manageer interface {
@@ -107,32 +108,52 @@ func (g *Game) Update() error {
 
 	//Colisiones.
 	for _, bullet := range g.bullets {
-		for _, bunker := range g.bunkers {
-			if g.checkCollision(bullet, bunker) {
-				if bunker.DoDamage(bullet.posX, bullet.posY) {
-					bullet.OnCollide()
+		if bullet.dirY < 0 {
+			//Bala de cañon
+			for _, bunker := range g.bunkers {
+				if g.checkCollision(bullet, bunker) {
+					if bunker.DoDamage(bullet.posX, bullet.posY, -1) {
+						bullet.OnCollide()
+					}
 				}
 			}
-		}
-		for _, enemy := range g.enemies {
-			if g.checkCollision(bullet, enemy) {
-				bullet.OnCollide()
-				enemy.OnCollide()
+			for _, enemy := range g.enemies {
+				if g.checkCollision(bullet, enemy) {
+					bullet.OnCollide()
+					enemy.OnCollide()
 
-				alienExplosionSprite, _ := g.spriteCreator.SpriteByName("alienExplosion")
-				enemyX, enemyY := enemy.Position()
-				explosion := NewExplosion(enemyX, enemyY, alienExplosionSprite, enemy.Color())
-				g.explosions = append(g.explosions, explosion)
+					alienExplosionSprite, _ := g.spriteCreator.SpriteByName("alienExplosion")
+					enemyX, enemyY := enemy.Position()
+					explosion := NewExplosion(enemyX, enemyY, alienExplosionSprite, enemy.Color())
+					g.explosions = append(g.explosions, explosion)
+				}
 			}
-		}
-		if g.checkCollision(bullet, g.ufo) {
-			bullet.OnCollide()
-			g.ufo.OnCollide()
+			if g.checkCollision(bullet, g.ufo) {
+				bullet.OnCollide()
+				g.ufo.OnCollide()
 
-			ufoExplosionSprite, _ := g.spriteCreator.SpriteByName("ufoExplosion")
-			ufoX, ufoY := g.ufo.Position()
-			explosionUfo := NewExplosionUfo(ufoX, ufoY, ufoExplosionSprite, g)
-			g.explosions = append(g.explosions, explosionUfo)
+				ufoExplosionSprite, _ := g.spriteCreator.SpriteByName("ufoExplosion")
+				ufoX, ufoY := g.ufo.Position()
+				explosionUfo := NewExplosionUfo(ufoX, ufoY, ufoExplosionSprite, g)
+				g.explosions = append(g.explosions, explosionUfo)
+			}
+		} else {
+			//Bala de alien.
+			for _, bunker := range g.bunkers {
+				if g.checkCollision(bullet, bunker) {
+					if bunker.DoDamage(bullet.posX, bullet.posY, 1) {
+						bullet.OnCollide()
+					}
+				}
+			}
+			if g.checkCollision(bullet, g.cannon) {
+				cannonExplosion1Sprite, _ := g.spriteCreator.SpriteByName("cannonExplosion1")
+				cannonExplosion2Sprite, _ := g.spriteCreator.SpriteByName("cannonExplosion2")
+				explosionCannon := NewExplosionCannon(g.cannon.posX, g.cannon.posY, cannonExplosion1Sprite, cannonExplosion2Sprite, g)
+				g.explosions = append(g.explosions, explosionCannon)
+				g.cannon.OnCollide()
+				bullet.OnCollide()
+			}
 		}
 	}
 
@@ -205,6 +226,10 @@ func (g *Game) OnChangeDirection(newDirection float32) {
 
 func (g *Game) OnResetUfo() {
 	g.ufo.Reset()
+}
+
+func (g *Game) OnResetCannon() {
+	g.cannon.Reset()
 }
 
 func (g *Game) checkCollision(sourceObj, targetObj Collider) bool {
