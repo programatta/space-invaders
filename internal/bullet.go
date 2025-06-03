@@ -1,25 +1,45 @@
 package internal
 
-import "github.com/hajimehoshi/ebiten/v2"
+import (
+	"image/color"
+
+	"github.com/hajimehoshi/ebiten/v2"
+)
 
 type Bullet struct {
-	sprite Sprite
-	posX   float32
-	posY   float32
-	remove bool
+	sprite     Sprite
+	posX       float32
+	posY       float32
+	dirY       float32
+	colorRed   float32
+	colorGreen float32
+	colorBlue  float32
+	colorAlpha float32
+	remove     bool
 }
 
-func NewBullet(posX, posY float32, sprite Sprite) *Bullet {
+func NewBullet(posX, posY float32, sprite Sprite, color color.Color, dirY float32) *Bullet {
+	red, green, blue, alpha := color.RGBA()
+	colorRed := float32(red)
+	colorGreen := float32(green)
+	colorBlue := float32(blue)
+	colorAlpha := float32(alpha)
 	return &Bullet{
-		sprite: sprite,
-		posX:   posX,
-		posY:   posY,
+		sprite:     sprite,
+		posX:       posX,
+		posY:       posY,
+		dirY:       dirY,
+		colorRed:   colorRed,
+		colorGreen: colorGreen,
+		colorBlue:  colorBlue,
+		colorAlpha: colorAlpha,
 	}
 }
 
 func (b *Bullet) Update() {
-	b.posY -= 1
-	if b.posY-float32(b.sprite.Image.Bounds().Dy()) < 0 {
+	b.posY += b.dirY
+
+	if b.posY-float32(b.sprite.Image.Bounds().Dy()) < 0 || b.posY > float32(DesignHeight) {
 		b.remove = true
 	}
 }
@@ -27,6 +47,7 @@ func (b *Bullet) Update() {
 func (b *Bullet) Draw(screen *ebiten.Image) {
 	opBullet := &ebiten.DrawImageOptions{}
 	opBullet.GeoM.Translate(float64(b.posX), float64(b.posY))
+	opBullet.ColorScale.Scale(b.colorRed, b.colorGreen, b.colorBlue, b.colorAlpha)
 	screen.DrawImage(b.sprite.Image, opBullet)
 }
 

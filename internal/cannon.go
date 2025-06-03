@@ -34,7 +34,7 @@ func (c *Cannon) ProcessKeyEvents() {
 
 	if c.canFired && ebiten.IsKeyPressed(ebiten.KeySpace) {
 		c.canFired = false
-		c.notify.OnCreateCannonBullet(c.posX+6, c.posY)
+		c.notify.OnCreateCannonBullet(c.posX+6, c.posY, c.sprite.Color)
 	}
 }
 

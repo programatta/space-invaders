@@ -2,6 +2,7 @@ package internal
 
 import (
 	"image/color"
+	"math/rand"
 	"slices"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -9,7 +10,8 @@ import (
 
 type Notifier interface {
 	OnChangeDirection(newDirection float32)
-	OnCreateCannonBullet(posX, posY float32)
+	OnCreateCannonBullet(posX, posY float32, color color.Color)
+	OnCreateAlienBullet(posX, posy float32, color color.Color)
 	OnResetUfo()
 }
 
@@ -42,6 +44,7 @@ type Game struct {
 	enemiesCurrentDir float32
 	newDirection      float32
 	explosions        []Explosioner
+	alienFireTime     float32
 }
 
 func NewGame() *Game {
@@ -78,6 +81,16 @@ func (g *Game) Update() error {
 	g.cannon.ProcessKeyEvents()
 
 	g.cannon.Update()
+
+	g.alienFireTime += dt
+	if g.alienFireTime > 0.400 {
+		if len(g.enemies) > 0 {
+			pos := rand.Intn(len(g.enemies))
+			g.enemies[pos].Fire()
+		}
+		g.alienFireTime = 0
+	}
+
 	for _, bullet := range g.bullets {
 		bullet.Update()
 	}
@@ -174,9 +187,15 @@ func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeigh
 }
 
 // Implementación de la interface Notifier
-func (g *Game) OnCreateCannonBullet(posX, posY float32) {
+func (g *Game) OnCreateCannonBullet(posX, posY float32, color color.Color) {
 	spriteBullet, _ := g.spriteCreator.SpriteByName("bullet")
-	bullet := NewBullet(posX, posY, spriteBullet)
+	bullet := NewBullet(posX, posY, spriteBullet, color, -1)
+	g.bullets = append(g.bullets, bullet)
+}
+
+func (g *Game) OnCreateAlienBullet(posX, posY float32, color color.Color) {
+	spriteBullet, _ := g.spriteCreator.SpriteByName("bullet")
+	bullet := NewBullet(posX, posY, spriteBullet, color, 1)
 	g.bullets = append(g.bullets, bullet)
 }
 

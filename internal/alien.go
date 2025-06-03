@@ -2,6 +2,7 @@ package internal
 
 import (
 	"image/color"
+	"math/rand/v2"
 
 	"github.com/hajimehoshi/ebiten/v2"
 )
@@ -79,6 +80,21 @@ func (a *Alien) Rect() (float32, float32, float32, float32) {
 
 func (a *Alien) OnCollide() {
 	a.remove = true
+}
+
+func (a *Alien) Fire() {
+	difX := 0
+	dado := rand.IntN(3)
+	if dado == 0 {
+		difX = -1
+	}
+	if dado == 2 {
+		difX = 1
+	}
+
+	bulletX := a.posX + float32(a.sprites[a.currentSprite].Image.Bounds().Dx()/2+difX)
+	bulletY := a.posY + float32(a.sprites[a.currentSprite].Image.Bounds().Dy())
+	a.notifier.OnCreateAlienBullet(bulletX, bulletY, a.sprites[a.currentSprite].Color)
 }
 
 const speed float32 = 200
