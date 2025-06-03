@@ -10,6 +10,21 @@ import (
 type Notifier interface {
 	OnChangeDirection(newDirection float32)
 	OnCreateCannonBullet(posX, posY float32)
+	OnResetUfo()
+}
+
+type Manageer interface {
+	Update()
+	Draw(screen *ebiten.Image)
+}
+
+type Eraser interface {
+	CanRemove() bool
+}
+
+type Explosioner interface {
+	Manageer
+	Eraser
 }
 
 type Collider interface {
@@ -26,6 +41,7 @@ type Game struct {
 	enemies           []*Alien
 	enemiesCurrentDir float32
 	newDirection      float32
+	explosions        []Explosioner
 }
 
 func NewGame() *Game {
@@ -72,6 +88,10 @@ func (g *Game) Update() error {
 		enemy.Update()
 	}
 
+	for _, explosion := range g.explosions {
+		explosion.Update()
+	}
+
 	//Colisiones.
 	for _, bullet := range g.bullets {
 		for _, bunker := range g.bunkers {
@@ -86,23 +106,20 @@ func (g *Game) Update() error {
 				bullet.OnCollide()
 				enemy.OnCollide()
 
-				//alienExplosionSprite, _ := g.spriteCreator.SpriteByName("alienExplosion")
-				//enemyX, enemyY := enemy.Position()
-				//explosion := NewExplosion(enemyX, enemyY, alienExplosionSprite, enemy.Color())
-				//g.explosions = append(g.explosions, explosion)
-				//g.score += uint32(enemy.Score())
+				alienExplosionSprite, _ := g.spriteCreator.SpriteByName("alienExplosion")
+				enemyX, enemyY := enemy.Position()
+				explosion := NewExplosion(enemyX, enemyY, alienExplosionSprite, enemy.Color())
+				g.explosions = append(g.explosions, explosion)
 			}
 		}
 		if g.checkCollision(bullet, g.ufo) {
 			bullet.OnCollide()
 			g.ufo.OnCollide()
 
-			// ufoExplosionSprite, _ := g.spriteCreator.SpriteByName("ufoExplosion")
-			// ufoX, ufoY := g.ufo.Position()
-			// explosionUfo := NewExplosionUfo(ufoX, ufoY, ufoExplosionSprite, g.face, g.ufo.Score(), g)
-			// g.explosions = append(g.explosions, explosionUfo)
-			// g.score += uint32(g.ufo.Score())
-
+			ufoExplosionSprite, _ := g.spriteCreator.SpriteByName("ufoExplosion")
+			ufoX, ufoY := g.ufo.Position()
+			explosionUfo := NewExplosionUfo(ufoX, ufoY, ufoExplosionSprite, g)
+			g.explosions = append(g.explosions, explosionUfo)
 		}
 	}
 
@@ -114,6 +131,11 @@ func (g *Game) Update() error {
 	if len(g.enemies) > 0 {
 		g.enemies = slices.DeleteFunc(g.enemies, func(alien *Alien) bool {
 			return alien.CanRemove()
+		})
+	}
+	if len(g.explosions) > 0 {
+		g.explosions = slices.DeleteFunc(g.explosions, func(explosion Explosioner) bool {
+			return explosion.CanRemove()
 		})
 	}
 
@@ -131,6 +153,10 @@ func (g *Game) Draw(screen *ebiten.Image) {
 
 	for _, enemy := range g.enemies {
 		enemy.Draw(screen)
+	}
+
+	for _, explosion := range g.explosions {
+		explosion.Draw(screen)
 	}
 
 	g.cannon.Draw(screen)
@@ -156,6 +182,10 @@ func (g *Game) OnCreateCannonBullet(posX, posY float32) {
 
 func (g *Game) OnChangeDirection(newDirection float32) {
 	g.newDirection = newDirection
+}
+
+func (g *Game) OnResetUfo() {
+	g.ufo.Reset()
 }
 
 func (g *Game) checkCollision(sourceObj, targetObj Collider) bool {

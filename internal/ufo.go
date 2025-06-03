@@ -40,3 +40,12 @@ func (u *Ufo) Rect() (float32, float32, float32, float32) {
 func (u *Ufo) OnCollide() {
 	u.remove = true
 }
+
+func (u *Ufo) Position() (float32, float32) {
+	return u.posX, u.posY
+}
+
+func (u *Ufo) Reset() {
+	u.posX = -100
+	u.remove = false
+}

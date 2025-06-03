@@ -1,6 +1,10 @@
 package internal
 
-import "github.com/hajimehoshi/ebiten/v2"
+import (
+	"image/color"
+
+	"github.com/hajimehoshi/ebiten/v2"
+)
 
 type Alien struct {
 	sprites       []Sprite
@@ -17,6 +21,14 @@ type Alien struct {
 func NewAlien(posX, posY float32, sprite1, sprite2 Sprite, notifier Notifier) *Alien {
 	sprites := []Sprite{sprite1, sprite2}
 	return &Alien{sprites: sprites, posX: posX, posY: posY, currentSprite: 0, time: 0, notifier: notifier}
+}
+
+func (a *Alien) Position() (float32, float32) {
+	return a.posX, a.posY
+}
+
+func (a *Alien) Color() color.Color {
+	return a.sprites[a.currentSprite].Color
 }
 
 func (a *Alien) ChangeDirection(currentDir float32) {

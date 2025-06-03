@@ -17,6 +17,9 @@ func NewSpriteCreator() *SpriteCreator {
 	spriteCreator.createCannonSprite()
 	spriteCreator.createBunkerSprite()
 	spriteCreator.createBulletSprite()
+	spriteCreator.createAlienExplosion()
+	spriteCreator.createUfoExplosion()
+	spriteCreator.createCannonExplosions()
 
 	return spriteCreator
 }
@@ -165,4 +168,62 @@ func (sc *SpriteCreator) createBulletSprite() {
 	}
 	sprite := SpriteFromArray(spriteDataBullet, 1, color.RGBA{255, 255, 255, 255})
 	sc.sprites["bullet"] = Sprite{Image: sprite, Color: color.RGBA{255, 255, 255, 255}, Data: spriteDataBullet}
+}
+
+func (sc *SpriteCreator) createAlienExplosion() {
+	var spriteDataExplosionAlien = [][]int{
+		{0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0},
+		{0, 1, 0, 0, 1, 0, 1, 0, 0, 1, 0},
+		{0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0},
+		{0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0},
+		{1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1},
+		{0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0},
+		{0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0},
+		{0, 1, 0, 0, 1, 0, 1, 0, 0, 1, 0},
+		{0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0},
+	}
+	sprite := SpriteFromArray(spriteDataExplosionAlien, 1, color.RGBA{255, 255, 255, 255})
+	sc.sprites["alienExplosion"] = Sprite{Image: sprite, Color: color.RGBA{255, 255, 255, 255}}
+}
+
+func (sc *SpriteCreator) createUfoExplosion() {
+	var spriteDataExplosionUFO = [][]int{
+		{0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1},
+		{0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 1, 0, 1, 0},
+		{1, 0, 1, 0, 0, 0, 1, 1, 0, 1, 1, 0, 0, 0, 0, 0},
+		{0, 0, 0, 0, 1, 1, 0, 1, 1, 0, 1, 1, 1, 0, 1, 0},
+		{0, 0, 1, 0, 1, 0, 1, 1, 1, 0, 1, 0, 1, 0, 0, 1},
+		{1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 1, 0, 0, 0, 0},
+		{0, 0, 1, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0},
+	}
+	sprite := SpriteFromArray(spriteDataExplosionUFO, 1, color.RGBA{255, 0, 0, 255})
+	sc.sprites["ufoExplosion"] = Sprite{Image: sprite, Color: color.RGBA{255, 0, 0, 255}}
+}
+
+func (sc *SpriteCreator) createCannonExplosions() {
+	var spriteDataExplosionCannon1 = [][]int{
+		{0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0},
+		{1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0},
+		{0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 1},
+		{1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0},
+		{0, 1, 0, 0, 1, 1, 0, 1, 1, 0, 0, 1, 0},
+		{0, 0, 1, 0, 0, 1, 1, 0, 0, 0, 1, 0, 1},
+		{0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0},
+		{0, 0, 1, 1, 0, 1, 1, 1, 1, 0, 0, 1, 0},
+	}
+
+	var spriteDataExplosionCannon2 = [][]int{
+		{0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0},
+		{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0},
+		{0, 0, 0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 0},
+		{0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1},
+		{0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0},
+		{1, 0, 0, 1, 0, 1, 1, 0, 0, 1, 0, 0, 0},
+		{0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 1, 0, 0},
+		{0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 0, 1},
+	}
+	sprite1 := SpriteFromArray(spriteDataExplosionCannon1, 1, color.RGBA{0, 255, 255, 255})
+	sprite2 := SpriteFromArray(spriteDataExplosionCannon2, 1, color.RGBA{0, 255, 255, 255})
+	sc.sprites["cannonExplosion1"] = Sprite{Image: sprite1, Color: color.RGBA{0, 255, 255, 255}}
+	sc.sprites["cannonExplosion2"] = Sprite{Image: sprite2, Color: color.RGBA{0, 255, 255, 255}}
 }
