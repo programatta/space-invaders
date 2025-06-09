@@ -57,14 +57,8 @@ func NewGame() *Game {
 	spriteCannon, _ := spriteCreator.SpriteByName("cannon")
 	game.cannon = NewCannon(float32(0), float32(DesignHeight-10), spriteCannon, game)
 
-	spriteBunker, _ := spriteCreator.SpriteByName("bunker")
-	bunker1 := NewBunker(float32(27), float32(DesignHeight-40), spriteBunker)
-
-	space := float32(bunker1.sprite.Image.Bounds().Dx())
-	bunker2 := NewBunker(27+space+20, float32(DesignHeight-40), spriteBunker)
-	bunker3 := NewBunker(27+2*(space+20), float32(DesignHeight-40), spriteBunker)
-	bunker4 := NewBunker(27+3*(space+20), float32(DesignHeight-40), spriteBunker)
-	game.bunkers = []*Bunker{bunker1, bunker2, bunker3, bunker4}
+	bunkers := createBunkers(spriteCreator)
+	game.bunkers = bunkers
 
 	ufoSprite, _ := spriteCreator.SpriteByName("ufo")
 	ufo := NewUfo(-20, 5, ufoSprite)
@@ -172,11 +166,16 @@ func (g *Game) Update() error {
 			return bullet.CanRemove()
 		})
 	}
+
 	if len(g.enemies) > 0 {
 		g.enemies = slices.DeleteFunc(g.enemies, func(alien *Alien) bool {
 			return alien.CanRemove()
 		})
+	} else {
+		g.reset()
+		g.cannon.Reset()
 	}
+
 	if len(g.explosions) > 0 {
 		g.explosions = slices.DeleteFunc(g.explosions, func(explosion Explosioner) bool {
 			return explosion.CanRemove()
@@ -255,6 +254,32 @@ func (g *Game) checkCollision(sourceObj, targetObj Collider) bool {
 	hasCollision := sx0 < tx0+tw && sx0+sw > tx0 && sy0 < ty0+th && sh+sy0 > ty0
 
 	return hasCollision
+}
+
+func (g *Game) reset() {
+	bunkers := createBunkers(g.spriteCreator)
+	enemies := createEnemies(g.spriteCreator, g)
+
+	g.enemies = enemies
+	g.bullets = []*Bullet{}
+	g.bunkers = bunkers
+	g.explosions = []Explosioner{}
+	g.enemiesCurrentDir = 1
+	g.newDirection = 1
+	g.alienFireTime = 0
+}
+
+func createBunkers(spriteCreator *SpriteCreator) []*Bunker {
+	bunkerSprite, _ := spriteCreator.SpriteByName("bunker")
+
+	var posX float32 = 27
+	bunkers := []*Bunker{}
+	for range 4 {
+		bunker := NewBunker(posX, float32(DesignHeight-40), bunkerSprite)
+		bunkers = append(bunkers, bunker)
+		posX += float32(bunkerSprite.Image.Bounds().Dx()) + 20
+	}
+	return bunkers
 }
 
 func createEnemies(spriteCreator *SpriteCreator, notifier Notifier) []*Alien {

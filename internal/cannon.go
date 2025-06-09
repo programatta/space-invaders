@@ -5,24 +5,26 @@ import (
 )
 
 type Cannon struct {
-	sprite   Sprite
-	posX     float32
-	posY     float32
-	dirX     float32
-	notify   Notifier
-	canFired bool
-	time     float32
-	active   bool
+	sprite       Sprite
+	posX         float32
+	posY         float32
+	originalPosX float32
+	dirX         float32
+	notify       Notifier
+	canFired     bool
+	time         float32
+	active       bool
 }
 
 func NewCannon(posX, posY float32, sprite Sprite, notify Notifier) *Cannon {
 	return &Cannon{
-		sprite:   sprite,
-		posX:     posX,
-		posY:     posY,
-		notify:   notify,
-		canFired: true,
-		active:   true,
+		sprite:       sprite,
+		posX:         posX,
+		posY:         posY,
+		originalPosX: posX,
+		notify:       notify,
+		canFired:     true,
+		active:       true,
 	}
 }
 
@@ -83,4 +85,5 @@ func (c *Cannon) OnCollide() {
 
 func (c *Cannon) Reset() {
 	c.active = true
+	c.posX = c.originalPosX
 }
