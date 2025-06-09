@@ -10,6 +10,7 @@ Cada paso incluye explicaciones técnicas, ejemplos de código, y una rama espec
 |Disparos|Lógica de disparos (1 a la vez), se mueven verticalmente| step-03-*|[▶️](./5_disparos.md)|
 |Bunkers|Bloques protectores y colisiones| step-04-*|[▶️](./6_bunker.md)|
 |Enemigos|Nave, aliens, colisiones y explosiones| step-05-*|[▶️](./7_enemigos.md)|
+|Victoria y derrota|Estados de juego| step-06-*|[▶️](./8_victoria_y_derrota.md)|
 
 > 🔔 **Ramas con asterisco**
 >
