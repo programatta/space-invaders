@@ -38,6 +38,7 @@ type Collider interface {
 type Game struct {
 	spriteCreator     *SpriteCreator
 	cannon            *Cannon
+	cannonCount       uint8
 	bullets           []*Bullet
 	bunkers           []*Bunker
 	ufo               *Ufo
@@ -68,6 +69,7 @@ func NewGame() *Game {
 	game.enemies = enemies
 	game.enemiesCurrentDir = 1
 	game.newDirection = 1
+	game.cannonCount = 3
 	return game
 }
 
@@ -145,7 +147,10 @@ func (g *Game) Update() error {
 				cannonExplosion2Sprite, _ := g.spriteCreator.SpriteByName("cannonExplosion2")
 				explosionCannon := NewExplosionCannon(g.cannon.posX, g.cannon.posY, cannonExplosion1Sprite, cannonExplosion2Sprite, g)
 				g.explosions = append(g.explosions, explosionCannon)
-				g.cannon.OnCollide()
+				if g.cannonCount > 0 {
+					g.cannonCount--
+					g.cannon.OnCollide()
+				}
 				bullet.OnCollide()
 			}
 		}
@@ -244,6 +249,10 @@ func (g *Game) OnResetUfo() {
 }
 
 func (g *Game) OnResetCannon() {
+	if g.cannonCount == 0 {
+		g.reset()
+		g.cannonCount = 3
+	}
 	g.cannon.Reset()
 }
 
