@@ -6,6 +6,8 @@ import (
 	"slices"
 
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
+	"github.com/hajimehoshi/ebiten/v2/inpututil"
 )
 
 type Notifier interface {
@@ -47,6 +49,7 @@ type Game struct {
 	newDirection      float32
 	explosions        []Explosioner
 	alienFireTime     float32
+	innerStateId      playInnerStateId
 }
 
 func NewGame() *Game {
@@ -70,13 +73,89 @@ func NewGame() *Game {
 	game.enemiesCurrentDir = 1
 	game.newDirection = 1
 	game.cannonCount = 3
+	game.innerStateId = playing
 	return game
 }
 
 // Implementación de la interface esperada por ebiten.
 func (g *Game) Update() error {
-	g.cannon.ProcessKeyEvents()
+	switch g.innerStateId {
+	case playing:
+		g.processKeyEventPlaying()
+		g.updatePlaying()
+	case gameOver:
+		g.processKeyEventGameOver()
+	}
 
+	return nil
+}
+
+func (g *Game) Draw(screen *ebiten.Image) {
+	screen.Fill(color.RGBA{0x03, 0x04, 0x5e, 0xFF})
+
+	switch g.innerStateId {
+	case playing:
+		g.drawPlaying(screen)
+	case gameOver:
+		g.drawGameOver(screen)
+	}
+}
+
+func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeight int) {
+	return DesignWidth, DesignHeight
+}
+
+// Implementación de la interface Notifier
+func (g *Game) OnCreateCannonBullet(posX, posY float32, color color.Color) {
+	spriteBullet, _ := g.spriteCreator.SpriteByName("bullet")
+	bullet := NewBullet(posX, posY, spriteBullet, color, -1)
+	g.bullets = append(g.bullets, bullet)
+}
+
+func (g *Game) OnCreateAlienBullet(posX, posY float32, color color.Color) {
+	spriteBullet, _ := g.spriteCreator.SpriteByName("bullet")
+	bullet := NewBullet(posX, posY, spriteBullet, color, 1)
+	g.bullets = append(g.bullets, bullet)
+}
+
+func (g *Game) OnChangeDirection(newDirection float32) {
+	g.newDirection = newDirection
+}
+
+func (g *Game) OnResetUfo() {
+	g.ufo.Reset()
+}
+
+func (g *Game) OnResetCannon() {
+	if g.cannonCount == 0 {
+		g.innerStateId = gameOver
+	}
+	g.cannon.Reset()
+}
+
+// -----------------------------------------------------------------------------
+// Sección de procesamiento de eventos por estado.
+// -----------------------------------------------------------------------------
+
+func (g *Game) processKeyEventPlaying() {
+	g.cannon.ProcessKeyEvents()
+}
+
+func (g *Game) processKeyEventGameOver() {
+	if inpututil.IsKeyJustReleased(ebiten.KeySpace) {
+		// resetear el juego.
+		g.reset()
+		g.cannon.Reset()
+		g.cannonCount = 3
+		g.innerStateId = playing
+	}
+}
+
+// -----------------------------------------------------------------------------
+// Sección de actualización por estado.
+// -----------------------------------------------------------------------------
+
+func (g *Game) updatePlaying() {
 	g.cannon.Update()
 
 	g.alienFireTime += dt
@@ -196,13 +275,13 @@ func (g *Game) Update() error {
 	if g.newDirection != g.enemiesCurrentDir {
 		g.enemiesCurrentDir = g.newDirection
 	}
-
-	return nil
 }
 
-func (g *Game) Draw(screen *ebiten.Image) {
-	screen.Fill(color.RGBA{0x03, 0x04, 0x5e, 0xFF})
+// -----------------------------------------------------------------------------
+// Sección de dibujo de pantalla por estado.
+// -----------------------------------------------------------------------------
 
+func (g *Game) drawPlaying(screen *ebiten.Image) {
 	g.ufo.Draw(screen)
 
 	for _, enemy := range g.enemies {
@@ -221,39 +300,11 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	for _, bunker := range g.bunkers {
 		bunker.Draw(screen)
 	}
+
 }
 
-func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeight int) {
-	return DesignWidth, DesignHeight
-}
-
-// Implementación de la interface Notifier
-func (g *Game) OnCreateCannonBullet(posX, posY float32, color color.Color) {
-	spriteBullet, _ := g.spriteCreator.SpriteByName("bullet")
-	bullet := NewBullet(posX, posY, spriteBullet, color, -1)
-	g.bullets = append(g.bullets, bullet)
-}
-
-func (g *Game) OnCreateAlienBullet(posX, posY float32, color color.Color) {
-	spriteBullet, _ := g.spriteCreator.SpriteByName("bullet")
-	bullet := NewBullet(posX, posY, spriteBullet, color, 1)
-	g.bullets = append(g.bullets, bullet)
-}
-
-func (g *Game) OnChangeDirection(newDirection float32) {
-	g.newDirection = newDirection
-}
-
-func (g *Game) OnResetUfo() {
-	g.ufo.Reset()
-}
-
-func (g *Game) OnResetCannon() {
-	if g.cannonCount == 0 {
-		g.reset()
-		g.cannonCount = 3
-	}
-	g.cannon.Reset()
+func (g *Game) drawGameOver(screen *ebiten.Image) {
+	ebitenutil.DebugPrint(screen, "Game Over State")
 }
 
 func (g *Game) checkCollision(sourceObj, targetObj Collider) bool {
