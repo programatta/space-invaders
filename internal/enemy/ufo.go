@@ -1,22 +1,26 @@
-package internal
+package enemy
 
-import "github.com/hajimehoshi/ebiten/v2"
+import (
+	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/programatta/spaceinvaders/internal/config"
+	"github.com/programatta/spaceinvaders/internal/sprite"
+)
 
 type Ufo struct {
-	sprite Sprite
+	sprite sprite.Sprite
 	posX   float32
 	posY   float32
 	remove bool
 }
 
-func NewUfo(posX, posY float32, sprite Sprite) *Ufo {
+func NewUfo(posX, posY float32, sprite sprite.Sprite) *Ufo {
 	return &Ufo{sprite: sprite, posX: posX, posY: posY}
 }
 
 func (u *Ufo) Update() {
 	if !u.remove {
 		u.posX++
-		if u.posX >= float32(DesignWidth) {
+		if u.posX >= float32(config.DesignWidth) {
 			u.posX = -100
 		}
 	}

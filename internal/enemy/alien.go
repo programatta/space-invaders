@@ -1,26 +1,29 @@
-package internal
+package enemy
 
 import (
 	"image/color"
 	"math/rand/v2"
 
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/programatta/spaceinvaders/internal/common"
+	"github.com/programatta/spaceinvaders/internal/config"
+	"github.com/programatta/spaceinvaders/internal/sprite"
 )
 
 type Alien struct {
-	sprites       []Sprite
+	sprites       []sprite.Sprite
 	currentSprite uint
 	posX          float32
 	posY          float32
 	currentDirX   float32
 	lastDirX      float32
 	time          float32
-	notifier      Notifier
+	notifier      common.Notifier
 	remove        bool
 }
 
-func NewAlien(posX, posY float32, sprite1, sprite2 Sprite, notifier Notifier) *Alien {
-	sprites := []Sprite{sprite1, sprite2}
+func NewAlien(posX, posY float32, sprite1, sprite2 sprite.Sprite, notifier common.Notifier) *Alien {
+	sprites := []sprite.Sprite{sprite1, sprite2}
 	return &Alien{sprites: sprites, posX: posX, posY: posY, currentSprite: 0, time: 0, notifier: notifier}
 }
 
@@ -44,16 +47,16 @@ func (a *Alien) Update() {
 		a.lastDirX = a.currentDirX
 	}
 
-	a.time += dt
+	a.time += config.Dt
 	if a.time >= 0.35 {
-		a.posX += speed * dt * a.currentDirX
+		a.posX += speed * config.Dt * a.currentDirX
 		a.currentSprite = (a.currentSprite + 1) % 2
 		a.time = 0
 	}
 
-	if a.posX+float32(a.sprites[a.currentSprite].Image.Bounds().Dx()) >= float32(DesignWidth) {
+	if a.posX+float32(a.sprites[a.currentSprite].Image.Bounds().Dx()) >= float32(config.DesignWidth) {
 		a.notifier.OnChangeDirection(-1)
-		a.posX = float32(DesignWidth) - float32(a.sprites[a.currentSprite].Image.Bounds().Dx())
+		a.posX = float32(config.DesignWidth) - float32(a.sprites[a.currentSprite].Image.Bounds().Dx())
 	} else if a.posX <= 0 {
 		a.notifier.OnChangeDirection(1)
 		a.posX = 0

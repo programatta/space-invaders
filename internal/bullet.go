@@ -4,10 +4,12 @@ import (
 	"image/color"
 
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/programatta/spaceinvaders/internal/config"
+	"github.com/programatta/spaceinvaders/internal/sprite"
 )
 
 type Bullet struct {
-	sprite     Sprite
+	sprite     sprite.Sprite
 	posX       float32
 	posY       float32
 	dirY       float32
@@ -18,7 +20,7 @@ type Bullet struct {
 	remove     bool
 }
 
-func NewBullet(posX, posY float32, sprite Sprite, color color.Color, dirY float32) *Bullet {
+func NewBullet(posX, posY float32, sprite sprite.Sprite, color color.Color, dirY float32) *Bullet {
 	red, green, blue, alpha := color.RGBA()
 	colorRed := float32(red)
 	colorGreen := float32(green)
@@ -39,7 +41,7 @@ func NewBullet(posX, posY float32, sprite Sprite, color color.Color, dirY float3
 func (b *Bullet) Update() {
 	b.posY += b.dirY
 
-	if b.posY-float32(b.sprite.Image.Bounds().Dy()) < 0 || b.posY > float32(DesignHeight) {
+	if b.posY-float32(b.sprite.Image.Bounds().Dy()) < 0 || b.posY > float32(config.DesignHeight) {
 		b.remove = true
 	}
 }

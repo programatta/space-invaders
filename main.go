@@ -4,10 +4,11 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 
 	"github.com/programatta/spaceinvaders/internal"
+	"github.com/programatta/spaceinvaders/internal/config"
 )
 
 func main() {
-	ebiten.SetWindowSize(internal.WindowWidth, internal.WindowHeight)
+	ebiten.SetWindowSize(config.WindowWidth, config.WindowHeight)
 	ebiten.SetWindowTitle("Juego")
 
 	game := internal.NewGame()

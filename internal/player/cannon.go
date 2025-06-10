@@ -1,22 +1,25 @@
-package internal
+package player
 
 import (
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/programatta/spaceinvaders/internal/common"
+	"github.com/programatta/spaceinvaders/internal/config"
+	"github.com/programatta/spaceinvaders/internal/sprite"
 )
 
 type Cannon struct {
-	sprite       Sprite
+	sprite       sprite.Sprite
 	posX         float32
 	posY         float32
 	originalPosX float32
 	dirX         float32
-	notify       Notifier
+	notify       common.Notifier
 	canFired     bool
 	time         float32
 	active       bool
 }
 
-func NewCannon(posX, posY float32, sprite Sprite, notify Notifier) *Cannon {
+func NewCannon(posX, posY float32, sprite sprite.Sprite, notify common.Notifier) *Cannon {
 	return &Cannon{
 		sprite:       sprite,
 		posX:         posX,
@@ -26,6 +29,10 @@ func NewCannon(posX, posY float32, sprite Sprite, notify Notifier) *Cannon {
 		canFired:     true,
 		active:       true,
 	}
+}
+
+func (c *Cannon) Position() (float32, float32) {
+	return c.posX, c.posY
 }
 
 func (c *Cannon) ProcessKeyEvents() {
@@ -47,7 +54,7 @@ func (c *Cannon) ProcessKeyEvents() {
 func (c *Cannon) Update() error {
 	if c.active {
 		if !c.canFired {
-			c.time += dt
+			c.time += config.Dt
 			if c.time >= 0.35 {
 				c.canFired = true
 				c.time = 0
@@ -57,8 +64,8 @@ func (c *Cannon) Update() error {
 		c.posX += c.dirX
 		if c.posX <= 0 {
 			c.posX = 0
-		} else if c.posX+float32(c.sprite.Image.Bounds().Dx()) >= float32(DesignWidth) {
-			c.posX = float32(DesignWidth) - float32(c.sprite.Image.Bounds().Dx())
+		} else if c.posX+float32(c.sprite.Image.Bounds().Dx()) >= float32(config.DesignWidth) {
+			c.posX = float32(config.DesignWidth) - float32(c.sprite.Image.Bounds().Dx())
 		}
 	}
 	return nil

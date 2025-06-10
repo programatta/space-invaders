@@ -8,15 +8,13 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
+	"github.com/programatta/spaceinvaders/internal/common"
+	"github.com/programatta/spaceinvaders/internal/config"
+	"github.com/programatta/spaceinvaders/internal/enemy"
+	"github.com/programatta/spaceinvaders/internal/explosion"
+	"github.com/programatta/spaceinvaders/internal/player"
+	"github.com/programatta/spaceinvaders/internal/sprite"
 )
-
-type Notifier interface {
-	OnChangeDirection(newDirection float32)
-	OnCreateCannonBullet(posX, posY float32, color color.Color)
-	OnCreateAlienBullet(posX, posy float32, color color.Color)
-	OnResetUfo()
-	OnResetCannon()
-}
 
 type Manageer interface {
 	Update()
@@ -38,13 +36,13 @@ type Collider interface {
 }
 
 type Game struct {
-	spriteCreator     *SpriteCreator
-	cannon            *Cannon
+	spriteCreator     *sprite.SpriteCreator
+	cannon            *player.Cannon
 	cannonCount       uint8
 	bullets           []*Bullet
-	bunkers           []*Bunker
-	ufo               *Ufo
-	enemies           []*Alien
+	bunkers           []*player.Bunker
+	ufo               *enemy.Ufo
+	enemies           []*enemy.Alien
 	enemiesCurrentDir float32
 	newDirection      float32
 	explosions        []Explosioner
@@ -53,19 +51,19 @@ type Game struct {
 }
 
 func NewGame() *Game {
-	spriteCreator := NewSpriteCreator()
+	spriteCreator := sprite.NewSpriteCreator()
 
 	game := &Game{}
 	game.spriteCreator = spriteCreator
 
 	spriteCannon, _ := spriteCreator.SpriteByName("cannon")
-	game.cannon = NewCannon(float32(0), float32(DesignHeight-10), spriteCannon, game)
+	game.cannon = player.NewCannon(float32(0), float32(config.DesignHeight-10), spriteCannon, game)
 
 	bunkers := createBunkers(spriteCreator)
 	game.bunkers = bunkers
 
 	ufoSprite, _ := spriteCreator.SpriteByName("ufo")
-	ufo := NewUfo(-20, 5, ufoSprite)
+	ufo := enemy.NewUfo(-20, 5, ufoSprite)
 	game.ufo = ufo
 
 	enemies := createEnemies(spriteCreator, game)
@@ -102,7 +100,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 }
 
 func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeight int) {
-	return DesignWidth, DesignHeight
+	return config.DesignWidth, config.DesignHeight
 }
 
 // Implementación de la interface Notifier
@@ -158,7 +156,7 @@ func (g *Game) processKeyEventGameOver() {
 func (g *Game) updatePlaying() {
 	g.cannon.Update()
 
-	g.alienFireTime += dt
+	g.alienFireTime += config.Dt
 	if g.alienFireTime > 0.400 {
 		if len(g.enemies) > 0 {
 			pos := rand.Intn(len(g.enemies))
@@ -199,7 +197,7 @@ func (g *Game) updatePlaying() {
 
 					alienExplosionSprite, _ := g.spriteCreator.SpriteByName("alienExplosion")
 					enemyX, enemyY := enemy.Position()
-					explosion := NewExplosion(enemyX, enemyY, alienExplosionSprite, enemy.Color())
+					explosion := explosion.NewExplosion(enemyX, enemyY, alienExplosionSprite, enemy.Color())
 					g.explosions = append(g.explosions, explosion)
 				}
 			}
@@ -209,7 +207,7 @@ func (g *Game) updatePlaying() {
 
 				ufoExplosionSprite, _ := g.spriteCreator.SpriteByName("ufoExplosion")
 				ufoX, ufoY := g.ufo.Position()
-				explosionUfo := NewExplosionUfo(ufoX, ufoY, ufoExplosionSprite, g)
+				explosionUfo := explosion.NewExplosionUfo(ufoX, ufoY, ufoExplosionSprite, g)
 				g.explosions = append(g.explosions, explosionUfo)
 			}
 		} else {
@@ -224,7 +222,8 @@ func (g *Game) updatePlaying() {
 			if g.checkCollision(bullet, g.cannon) {
 				cannonExplosion1Sprite, _ := g.spriteCreator.SpriteByName("cannonExplosion1")
 				cannonExplosion2Sprite, _ := g.spriteCreator.SpriteByName("cannonExplosion2")
-				explosionCannon := NewExplosionCannon(g.cannon.posX, g.cannon.posY, cannonExplosion1Sprite, cannonExplosion2Sprite, g)
+				posX, posY := g.cannon.Position()
+				explosionCannon := explosion.NewExplosionCannon(posX, posY, cannonExplosion1Sprite, cannonExplosion2Sprite, g)
 				g.explosions = append(g.explosions, explosionCannon)
 				if g.cannonCount > 0 {
 					g.cannonCount--
@@ -252,7 +251,7 @@ func (g *Game) updatePlaying() {
 	}
 
 	if len(g.enemies) > 0 {
-		g.enemies = slices.DeleteFunc(g.enemies, func(alien *Alien) bool {
+		g.enemies = slices.DeleteFunc(g.enemies, func(alien *enemy.Alien) bool {
 			return alien.CanRemove()
 		})
 	} else {
@@ -267,7 +266,7 @@ func (g *Game) updatePlaying() {
 	}
 
 	if len(g.bunkers) > 0 {
-		g.bunkers = slices.DeleteFunc(g.bunkers, func(bunker *Bunker) bool {
+		g.bunkers = slices.DeleteFunc(g.bunkers, func(bunker *player.Bunker) bool {
 			return bunker.CanRemove()
 		})
 	}
@@ -329,21 +328,21 @@ func (g *Game) reset() {
 	g.alienFireTime = 0
 }
 
-func createBunkers(spriteCreator *SpriteCreator) []*Bunker {
+func createBunkers(spriteCreator *sprite.SpriteCreator) []*player.Bunker {
 	bunkerSprite, _ := spriteCreator.SpriteByName("bunker")
 
 	var posX float32 = 27
-	bunkers := []*Bunker{}
+	bunkers := []*player.Bunker{}
 	for range 4 {
-		bunker := NewBunker(posX, float32(DesignHeight-40), bunkerSprite)
+		bunker := player.NewBunker(posX, float32(config.DesignHeight-40), bunkerSprite)
 		bunkers = append(bunkers, bunker)
 		posX += float32(bunkerSprite.Image.Bounds().Dx()) + 20
 	}
 	return bunkers
 }
 
-func createEnemies(spriteCreator *SpriteCreator, notifier Notifier) []*Alien {
-	enemies := []*Alien{}
+func createEnemies(spriteCreator *sprite.SpriteCreator, notifier common.Notifier) []*enemy.Alien {
+	enemies := []*enemy.Alien{}
 
 	squids := createSquids(11, 1, 11, 35, spriteCreator, notifier)
 	enemies = append(enemies, squids...)
@@ -357,15 +356,15 @@ func createEnemies(spriteCreator *SpriteCreator, notifier Notifier) []*Alien {
 	return enemies
 }
 
-func createCrabs(count, rows uint8, initX, initY float32, spriteCreator *SpriteCreator, notifier Notifier) []*Alien {
+func createCrabs(count, rows uint8, initX, initY float32, spriteCreator *sprite.SpriteCreator, notifier common.Notifier) []*enemy.Alien {
 	sprite1, _ := spriteCreator.SpriteByName("crab1")
 	sprite2, _ := spriteCreator.SpriteByName("crab2")
-	crabs := []*Alien{}
+	crabs := []*enemy.Alien{}
 
 	posX := initX
 	posY := initY
 	for i := range count * rows {
-		crab := NewAlien(posX, posY, sprite1, sprite2, notifier)
+		crab := enemy.NewAlien(posX, posY, sprite1, sprite2, notifier)
 		crabs = append(crabs, crab)
 		posX += float32(sprite1.Image.Bounds().Dx() + 6)
 		if i > 0 && (i+1)%count == 0 {
@@ -376,15 +375,15 @@ func createCrabs(count, rows uint8, initX, initY float32, spriteCreator *SpriteC
 	return crabs
 }
 
-func createOctopuses(count, rows uint8, initX, initY float32, spriteCreator *SpriteCreator, notifier Notifier) []*Alien {
+func createOctopuses(count, rows uint8, initX, initY float32, spriteCreator *sprite.SpriteCreator, notifier common.Notifier) []*enemy.Alien {
 	sprite1, _ := spriteCreator.SpriteByName("octopus1")
 	sprite2, _ := spriteCreator.SpriteByName("octopus2")
-	octopuses := []*Alien{}
+	octopuses := []*enemy.Alien{}
 
 	posX := initX
 	posY := initY
 	for i := range count * rows {
-		octopus := NewAlien(posX, posY, sprite1, sprite2, notifier)
+		octopus := enemy.NewAlien(posX, posY, sprite1, sprite2, notifier)
 		octopuses = append(octopuses, octopus)
 		posX += float32(sprite1.Image.Bounds().Dx() + 5)
 		if i > 0 && (i+1)%count == 0 {
@@ -395,15 +394,15 @@ func createOctopuses(count, rows uint8, initX, initY float32, spriteCreator *Spr
 	return octopuses
 }
 
-func createSquids(count, rows uint8, initX, initY float32, spriteCreator *SpriteCreator, notifier Notifier) []*Alien {
+func createSquids(count, rows uint8, initX, initY float32, spriteCreator *sprite.SpriteCreator, notifier common.Notifier) []*enemy.Alien {
 	sprite1, _ := spriteCreator.SpriteByName("squid1")
 	sprite2, _ := spriteCreator.SpriteByName("squid2")
-	squids := []*Alien{}
+	squids := []*enemy.Alien{}
 
 	posX := initX
 	posY := initY
 	for i := range count * rows {
-		squid := NewAlien(posX, posY, sprite1, sprite2, notifier)
+		squid := enemy.NewAlien(posX, posY, sprite1, sprite2, notifier)
 		squids = append(squids, squid)
 		posX += float32(sprite1.Image.Bounds().Dx() + 9)
 		if i > 0 && (i+1)%count == 0 {
@@ -413,10 +412,3 @@ func createSquids(count, rows uint8, initX, initY float32, spriteCreator *Sprite
 	}
 	return squids
 }
-
-const dt float32 = float32(1.0 / 60)
-
-const WindowWidth int = 642
-const WindowHeight int = 642
-const DesignWidth int = WindowWidth / 3
-const DesignHeight int = WindowHeight / 3

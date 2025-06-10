@@ -1,19 +1,21 @@
-package internal
+package player
 
 import (
 	"image/color"
 
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/programatta/spaceinvaders/internal/sprite"
+	"github.com/programatta/spaceinvaders/internal/utils"
 )
 
 type Bunker struct {
-	sprite Sprite
+	sprite sprite.Sprite
 	posX   float32
 	posY   float32
 	remove bool
 }
 
-func NewBunker(posX, posY float32, sprite Sprite) *Bunker {
+func NewBunker(posX, posY float32, sprite sprite.Sprite) *Bunker {
 	spriteDataBunker := make([][]int, len(sprite.Data))
 	for i := range sprite.Data {
 		spriteDataBunker[i] = make([]int, len(sprite.Data[i]))
@@ -56,7 +58,7 @@ func (b *Bunker) DoDamage(damageX, damageY float32, dir int) bool {
 					b.sprite.Data[logY-1][logX] = 0
 				}
 			}
-			b.sprite.Image = SpriteFromArray(b.sprite.Data, 1, color.RGBA{0, 255, 0, 255})
+			b.sprite.Image = utils.SpriteFromArray(b.sprite.Data, 1, color.RGBA{0, 255, 0, 255})
 			damage = true
 		}
 	}

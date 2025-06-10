@@ -1,4 +1,4 @@
-package internal
+package sprite
 
 import (
 	"image/color"

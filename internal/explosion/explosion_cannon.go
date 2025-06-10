@@ -1,20 +1,25 @@
-package internal
+package explosion
 
-import "github.com/hajimehoshi/ebiten/v2"
+import (
+	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/programatta/spaceinvaders/internal/common"
+	"github.com/programatta/spaceinvaders/internal/config"
+	"github.com/programatta/spaceinvaders/internal/sprite"
+)
 
 type ExplosionCannon struct {
-	sprites       []Sprite
+	sprites       []sprite.Sprite
 	currentSprite uint8
 	posX          float32
 	posY          float32
-	notifier      Notifier
+	notifier      common.Notifier
 	time          float32
 	repeatCount   uint8
 	remove        bool
 }
 
-func NewExplosionCannon(posX, posY float32, sprite1, sprite2 Sprite, notifier Notifier) *ExplosionCannon {
-	sprites := []Sprite{sprite1, sprite2}
+func NewExplosionCannon(posX, posY float32, sprite1, sprite2 sprite.Sprite, notifier common.Notifier) *ExplosionCannon {
+	sprites := []sprite.Sprite{sprite1, sprite2}
 	return &ExplosionCannon{sprites: sprites, currentSprite: 0, posX: posX, posY: posY, notifier: notifier, time: 0, repeatCount: 8, remove: false}
 }
 
@@ -24,7 +29,7 @@ func (ec *ExplosionCannon) CanRemove() bool {
 
 func (ec *ExplosionCannon) Update() {
 	if ec.repeatCount > 0 {
-		ec.time += dt
+		ec.time += config.Dt
 		if ec.time >= 0.35 {
 			ec.currentSprite = (ec.currentSprite + 1) % 2
 			ec.time = 0

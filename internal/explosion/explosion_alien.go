@@ -1,13 +1,15 @@
-package internal
+package explosion
 
 import (
 	"image/color"
 
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/programatta/spaceinvaders/internal/config"
+	"github.com/programatta/spaceinvaders/internal/sprite"
 )
 
 type ExplosionAlien struct {
-	sprite     Sprite
+	sprite     sprite.Sprite
 	posX       float32
 	posY       float32
 	colorRed   float32
@@ -18,7 +20,7 @@ type ExplosionAlien struct {
 	remove     bool
 }
 
-func NewExplosion(posX, posY float32, sprite Sprite, color color.Color) *ExplosionAlien {
+func NewExplosion(posX, posY float32, sprite sprite.Sprite, color color.Color) *ExplosionAlien {
 	red, green, blue, alpha := color.RGBA()
 	colorRed := float32(red)
 	colorGreen := float32(green)
@@ -33,7 +35,7 @@ func (ea *ExplosionAlien) CanRemove() bool {
 }
 
 func (ea *ExplosionAlien) Update() {
-	ea.time += dt
+	ea.time += config.Dt
 	if ea.time >= 0.35 {
 		ea.time = 0
 		ea.remove = true
