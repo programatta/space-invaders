@@ -1,6 +1,8 @@
 package enemy
 
 import (
+	"math/rand/v2"
+
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/programatta/spaceinvaders/internal/config"
 	"github.com/programatta/spaceinvaders/internal/sprite"
@@ -32,6 +34,12 @@ func (u *Ufo) Draw(screen *ebiten.Image) {
 		opUfo.GeoM.Translate(float64(u.posX), float64(u.posY))
 		screen.DrawImage(u.sprite.Image, opUfo)
 	}
+}
+
+func (u *Ufo) Score() uint16 {
+	scores := []uint16{150, 175, 200, 225, 250, 275, 300, 325, 350}
+	pos := rand.IntN(len(scores))
+	return scores[pos]
 }
 
 // Implementación de la interface Collider.

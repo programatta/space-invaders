@@ -15,6 +15,7 @@ type Alien struct {
 	currentSprite uint
 	posX          float32
 	posY          float32
+	score         uint8
 	currentDirX   float32
 	lastDirX      float32
 	time          float32
@@ -22,9 +23,9 @@ type Alien struct {
 	remove        bool
 }
 
-func NewAlien(posX, posY float32, sprite1, sprite2 sprite.Sprite, notifier common.Notifier) *Alien {
+func NewAlien(posX, posY float32, sprite1, sprite2 sprite.Sprite, score uint8, notifier common.Notifier) *Alien {
 	sprites := []sprite.Sprite{sprite1, sprite2}
-	return &Alien{sprites: sprites, posX: posX, posY: posY, currentSprite: 0, time: 0, notifier: notifier}
+	return &Alien{sprites: sprites, posX: posX, posY: posY, score: score, currentSprite: 0, time: 0, notifier: notifier}
 }
 
 func (a *Alien) Position() (float32, float32) {
@@ -98,6 +99,10 @@ func (a *Alien) Fire() {
 	bulletX := a.posX + float32(a.sprites[a.currentSprite].Image.Bounds().Dx()/2+difX)
 	bulletY := a.posY + float32(a.sprites[a.currentSprite].Image.Bounds().Dy())
 	a.notifier.OnCreateAlienBullet(bulletX, bulletY, a.sprites[a.currentSprite].Color)
+}
+
+func (a *Alien) Score() uint8 {
+	return a.score
 }
 
 const speed float32 = 200

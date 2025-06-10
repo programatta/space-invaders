@@ -42,6 +42,7 @@ type Game struct {
 	textFace          *text.GoTextFace
 	cannon            *player.Cannon
 	cannonCount       uint8
+	score             uint32
 	bullets           []*Bullet
 	bunkers           []*player.Bunker
 	ufo               *enemy.Ufo
@@ -76,6 +77,7 @@ func NewGame() *Game {
 	game.enemiesCurrentDir = 1
 	game.newDirection = 1
 	game.cannonCount = 3
+	game.score = 0
 	game.innerStateId = playing
 	return game
 }
@@ -150,6 +152,7 @@ func (g *Game) processKeyEventGameOver() {
 		g.reset()
 		g.cannon.Reset()
 		g.cannonCount = 3
+		g.score = 0
 		g.innerStateId = playing
 	}
 }
@@ -204,6 +207,7 @@ func (g *Game) updatePlaying() {
 					enemyX, enemyY := enemy.Position()
 					explosion := explosion.NewExplosion(enemyX, enemyY, alienExplosionSprite, enemy.Color())
 					g.explosions = append(g.explosions, explosion)
+					g.score += uint32(enemy.Score())
 				}
 			}
 			if g.checkCollision(bullet, g.ufo) {
@@ -214,6 +218,7 @@ func (g *Game) updatePlaying() {
 				ufoX, ufoY := g.ufo.Position()
 				explosionUfo := explosion.NewExplosionUfo(ufoX, ufoY, ufoExplosionSprite, g)
 				g.explosions = append(g.explosions, explosionUfo)
+				g.score += uint32(g.ufo.Score())
 			}
 		} else {
 			//Bala de alien.
@@ -292,6 +297,13 @@ func (g *Game) drawPlaying(screen *ebiten.Image) {
 	op.ColorScale.ScaleWithColor(color.White)
 	text.Draw(screen, uiCannonCountText, g.textFace, op)
 
+	uiScoreText := fmt.Sprintf("SCORE:%06d", g.score)
+	widthText, _ := text.Measure(uiScoreText, g.textFace, 0)
+	op = &text.DrawOptions{}
+	op.GeoM.Translate(float64(config.DesignWidth)-widthText-10, 6)
+	op.ColorScale.ScaleWithColor(color.White)
+	text.Draw(screen, uiScoreText, g.textFace, op)
+
 	g.ufo.Draw(screen)
 
 	for _, enemy := range g.enemies {
@@ -315,13 +327,24 @@ func (g *Game) drawPlaying(screen *ebiten.Image) {
 
 func (g *Game) drawGameOver(screen *ebiten.Image) {
 	uiGameOverText := "GAME OVER"
-	gameOverX := float64(config.DesignWidth/2 - 24)
+	widthText, _ := text.Measure(uiGameOverText, g.textFace, 0)
+	gameOverX := float64(config.DesignWidth/2) - widthText/2
 	gameOverY := float64(config.DesignHeight/2 - 30)
 
 	op := &text.DrawOptions{}
 	op.GeoM.Translate(gameOverX, gameOverY)
 	op.ColorScale.ScaleWithColor(color.White)
 	text.Draw(screen, uiGameOverText, g.textFace, op)
+
+	uiYourScoreText := fmt.Sprintf("YOUR SCORE:%06d", g.score)
+	widthText, _ = text.Measure(uiYourScoreText, g.textFace, 0)
+	yourScoreX := float64(config.DesignWidth/2) - widthText/2
+	yourScoreY := float64(config.DesignHeight/2 - 15)
+
+	op = &text.DrawOptions{}
+	op.GeoM.Translate(yourScoreX, yourScoreY)
+	op.ColorScale.ScaleWithColor(color.White)
+	text.Draw(screen, uiYourScoreText, g.textFace, op)
 }
 
 func (g *Game) checkCollision(sourceObj, targetObj Collider) bool {
@@ -382,7 +405,7 @@ func createCrabs(count, rows uint8, initX, initY float32, spriteCreator *sprite.
 	posX := initX
 	posY := initY
 	for i := range count * rows {
-		crab := enemy.NewAlien(posX, posY, sprite1, sprite2, notifier)
+		crab := enemy.NewAlien(posX, posY, sprite1, sprite2, 20, notifier)
 		crabs = append(crabs, crab)
 		posX += float32(sprite1.Image.Bounds().Dx() + 6)
 		if i > 0 && (i+1)%count == 0 {
@@ -401,7 +424,7 @@ func createOctopuses(count, rows uint8, initX, initY float32, spriteCreator *spr
 	posX := initX
 	posY := initY
 	for i := range count * rows {
-		octopus := enemy.NewAlien(posX, posY, sprite1, sprite2, notifier)
+		octopus := enemy.NewAlien(posX, posY, sprite1, sprite2, 10, notifier)
 		octopuses = append(octopuses, octopus)
 		posX += float32(sprite1.Image.Bounds().Dx() + 5)
 		if i > 0 && (i+1)%count == 0 {
@@ -420,7 +443,7 @@ func createSquids(count, rows uint8, initX, initY float32, spriteCreator *sprite
 	posX := initX
 	posY := initY
 	for i := range count * rows {
-		squid := enemy.NewAlien(posX, posY, sprite1, sprite2, notifier)
+		squid := enemy.NewAlien(posX, posY, sprite1, sprite2, 30, notifier)
 		squids = append(squids, squid)
 		posX += float32(sprite1.Image.Bounds().Dx() + 9)
 		if i > 0 && (i+1)%count == 0 {
