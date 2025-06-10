@@ -1,9 +1,13 @@
 package utils
 
 import (
+	"bytes"
 	"image/color"
+	"log"
 
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/text/v2"
+	"github.com/programatta/spaceinvaders/internal/assets/fonts"
 )
 
 func SpriteFromArray(data [][]int, pixelSize int, colorOn color.Color) *ebiten.Image {
@@ -24,4 +28,16 @@ func SpriteFromArray(data [][]int, pixelSize int, colorOn color.Color) *ebiten.I
 		}
 	}
 	return img
+}
+
+func LoadEmbeddedFont(size float64) *text.GoTextFace {
+	faceSource, err := text.NewGoTextFaceSource(bytes.NewReader(fonts.FontFiles))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return &text.GoTextFace{
+		Source: faceSource,
+		Size:   size,
+	}
 }

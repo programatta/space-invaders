@@ -1,19 +1,21 @@
 package internal
 
 import (
+	"fmt"
 	"image/color"
 	"math/rand"
 	"slices"
 
 	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
+	"github.com/hajimehoshi/ebiten/v2/text/v2"
 	"github.com/programatta/spaceinvaders/internal/common"
 	"github.com/programatta/spaceinvaders/internal/config"
 	"github.com/programatta/spaceinvaders/internal/enemy"
 	"github.com/programatta/spaceinvaders/internal/explosion"
 	"github.com/programatta/spaceinvaders/internal/player"
 	"github.com/programatta/spaceinvaders/internal/sprite"
+	"github.com/programatta/spaceinvaders/internal/utils"
 )
 
 type Manageer interface {
@@ -37,6 +39,7 @@ type Collider interface {
 
 type Game struct {
 	spriteCreator     *sprite.SpriteCreator
+	textFace          *text.GoTextFace
 	cannon            *player.Cannon
 	cannonCount       uint8
 	bullets           []*Bullet
@@ -52,9 +55,11 @@ type Game struct {
 
 func NewGame() *Game {
 	spriteCreator := sprite.NewSpriteCreator()
+	textFace := utils.LoadEmbeddedFont(8)
 
 	game := &Game{}
 	game.spriteCreator = spriteCreator
+	game.textFace = textFace
 
 	spriteCannon, _ := spriteCreator.SpriteByName("cannon")
 	game.cannon = player.NewCannon(float32(0), float32(config.DesignHeight-10), spriteCannon, game)
@@ -63,7 +68,7 @@ func NewGame() *Game {
 	game.bunkers = bunkers
 
 	ufoSprite, _ := spriteCreator.SpriteByName("ufo")
-	ufo := enemy.NewUfo(-20, 5, ufoSprite)
+	ufo := enemy.NewUfo(-20, 15, ufoSprite)
 	game.ufo = ufo
 
 	enemies := createEnemies(spriteCreator, game)
@@ -281,6 +286,12 @@ func (g *Game) updatePlaying() {
 // -----------------------------------------------------------------------------
 
 func (g *Game) drawPlaying(screen *ebiten.Image) {
+	uiCannonCountText := fmt.Sprintf("LIVES:%1d", g.cannonCount)
+	op := &text.DrawOptions{}
+	op.GeoM.Translate(10, 6)
+	op.ColorScale.ScaleWithColor(color.White)
+	text.Draw(screen, uiCannonCountText, g.textFace, op)
+
 	g.ufo.Draw(screen)
 
 	for _, enemy := range g.enemies {
@@ -303,7 +314,14 @@ func (g *Game) drawPlaying(screen *ebiten.Image) {
 }
 
 func (g *Game) drawGameOver(screen *ebiten.Image) {
-	ebitenutil.DebugPrint(screen, "Game Over State")
+	uiGameOverText := "GAME OVER"
+	gameOverX := float64(config.DesignWidth/2 - 24)
+	gameOverY := float64(config.DesignHeight/2 - 30)
+
+	op := &text.DrawOptions{}
+	op.GeoM.Translate(gameOverX, gameOverY)
+	op.ColorScale.ScaleWithColor(color.White)
+	text.Draw(screen, uiGameOverText, g.textFace, op)
 }
 
 func (g *Game) checkCollision(sourceObj, targetObj Collider) bool {
