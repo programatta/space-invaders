@@ -13,17 +13,19 @@ type Ufo struct {
 	posX   float32
 	posY   float32
 	remove bool
+	active bool
+	speed  float32
 }
 
 func NewUfo(posX, posY float32, sprite sprite.Sprite) *Ufo {
-	return &Ufo{sprite: sprite, posX: posX, posY: posY}
+	return &Ufo{sprite: sprite, posX: posX, posY: posY, active: true, speed: 60}
 }
 
 func (u *Ufo) Update() {
 	if !u.remove {
-		u.posX++
+		u.posX += u.speed * config.Dt
 		if u.posX >= float32(config.DesignWidth) {
-			u.posX = -100
+			u.resetPosition()
 		}
 	}
 }
@@ -42,6 +44,10 @@ func (u *Ufo) Score() uint16 {
 	return scores[pos]
 }
 
+func (u *Ufo) IsActive() bool {
+	return u.active
+}
+
 // Implementación de la interface Collider.
 func (u *Ufo) Rect() (float32, float32, float32, float32) {
 	width := float32(u.sprite.Image.Bounds().Dx())
@@ -51,6 +57,7 @@ func (u *Ufo) Rect() (float32, float32, float32, float32) {
 
 func (u *Ufo) OnCollide() {
 	u.remove = true
+	u.active = false
 }
 
 func (u *Ufo) Position() (float32, float32) {
@@ -58,6 +65,12 @@ func (u *Ufo) Position() (float32, float32) {
 }
 
 func (u *Ufo) Reset() {
-	u.posX = -100
+	u.resetPosition()
 	u.remove = false
+	u.active = true
+}
+
+func (u *Ufo) resetPosition() {
+	pos := rand.IntN(500) + 200
+	u.posX = -float32(pos)
 }

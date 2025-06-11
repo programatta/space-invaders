@@ -221,15 +221,16 @@ func (g *Game) updatePlaying() {
 					g.soundEffects.PlayAlienKilled()
 				}
 			}
-			if g.checkCollision(bullet, g.ufo) {
+			if g.ufo.IsActive() && g.checkCollision(bullet, g.ufo) {
 				bullet.OnCollide()
 				g.ufo.OnCollide()
 
 				ufoExplosionSprite, _ := g.spriteCreator.SpriteByName("ufoExplosion")
 				ufoX, ufoY := g.ufo.Position()
-				explosionUfo := explosion.NewExplosionUfo(ufoX, ufoY, ufoExplosionSprite, g)
+				ufoScore := g.ufo.Score()
+				explosionUfo := explosion.NewExplosionUfo(ufoX, ufoY, ufoExplosionSprite, g.textFace, ufoScore, g)
 				g.explosions = append(g.explosions, explosionUfo)
-				g.score += uint32(g.ufo.Score())
+				g.score += uint32(ufoScore)
 			}
 		} else {
 			//Bala de alien.
