@@ -213,6 +213,7 @@ func (g *Game) updatePlaying() {
 					explosion := explosion.NewExplosion(enemyX, enemyY, alienExplosionSprite, enemy.Color())
 					g.explosions = append(g.explosions, explosion)
 					g.score += uint32(enemy.Score())
+					g.soundEffects.PlayAlienKilled()
 				}
 			}
 			if g.checkCollision(bullet, g.ufo) {

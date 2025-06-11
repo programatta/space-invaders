@@ -9,7 +9,8 @@ import (
 )
 
 type SoundEffects struct {
-	shootPlayer *audio.Player
+	shootPlayer         *audio.Player
+	invaderKilledPlayer *audio.Player
 }
 
 func NewSoundEffects() *SoundEffects {
@@ -18,7 +19,24 @@ func NewSoundEffects() *SoundEffects {
 	const sampleRate = 44100
 	audioContext := audio.NewContext(sampleRate)
 
-	wavStream, decodeErr := wav.DecodeWithSampleRate(audioContext.SampleRate(), bytes.NewReader(sounds.ShootWav))
+	soundEffects.shootPlayer = loadSound(audioContext, sounds.ShootWav)
+	soundEffects.invaderKilledPlayer = loadSound(audioContext, sounds.InvaderKilledWav)
+
+	return soundEffects
+}
+
+func (se SoundEffects) PlayShoot() {
+	se.shootPlayer.Rewind()
+	se.shootPlayer.Play()
+}
+
+func (se SoundEffects) PlayAlienKilled() {
+	se.invaderKilledPlayer.Rewind()
+	se.invaderKilledPlayer.Play()
+}
+
+func loadSound(audioContext *audio.Context, sourceSound []byte) *audio.Player {
+	wavStream, decodeErr := wav.DecodeWithSampleRate(audioContext.SampleRate(), bytes.NewReader(sourceSound))
 	if decodeErr != nil {
 		panic(decodeErr)
 	}
@@ -27,13 +45,5 @@ func NewSoundEffects() *SoundEffects {
 	if playerErr != nil {
 		panic(playerErr)
 	}
-
-	soundEffects.shootPlayer = player
-
-	return soundEffects
-}
-
-func (se SoundEffects) PlayShoot() {
-	se.shootPlayer.Rewind()
-	se.shootPlayer.Play()
+	return player
 }
