@@ -12,6 +12,7 @@ type SoundEffects struct {
 	shootPlayer           *audio.Player
 	invaderKilledPlayer   *audio.Player
 	cannonExplosionPlayer *audio.Player
+	ufoPlayer             *audio.Player
 }
 
 func NewSoundEffects() *SoundEffects {
@@ -23,6 +24,7 @@ func NewSoundEffects() *SoundEffects {
 	soundEffects.shootPlayer = loadSound(audioContext, sounds.ShootWav)
 	soundEffects.invaderKilledPlayer = loadSound(audioContext, sounds.InvaderKilledWav)
 	soundEffects.cannonExplosionPlayer = loadSound(audioContext, sounds.CannonExplosionWav)
+	soundEffects.ufoPlayer = loadSound(audioContext, sounds.UfoHighpitchWav)
 
 	return soundEffects
 }
@@ -37,6 +39,13 @@ func (se SoundEffects) PlayAlienKilled() {
 
 func (se SoundEffects) PlayCannonExplosion() {
 	se.resetPlayer(se.cannonExplosionPlayer)
+}
+
+func (se SoundEffects) PlayUfo() {
+	if se.ufoPlayer.IsPlaying() {
+		return
+	}
+	se.resetPlayer(se.ufoPlayer)
 }
 
 func (se SoundEffects) resetPlayer(player *audio.Player) {

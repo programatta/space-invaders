@@ -183,6 +183,11 @@ func (g *Game) updatePlaying() {
 	}
 
 	g.ufo.Update()
+	ufoX, _ := g.ufo.Position()
+	if ufoX >= 5 {
+		g.soundEffects.PlayUfo()
+	}
+
 	for _, enemy := range g.enemies {
 		enemy.ChangeDirection(g.enemiesCurrentDir)
 		enemy.Update()
