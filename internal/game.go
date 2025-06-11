@@ -246,6 +246,7 @@ func (g *Game) updatePlaying() {
 					g.cannon.OnCollide()
 				}
 				bullet.OnCollide()
+				g.soundEffects.PlayCannonExplosion()
 			}
 		}
 	}
