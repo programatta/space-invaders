@@ -14,6 +14,7 @@ import (
 	"github.com/programatta/spaceinvaders/internal/enemy"
 	"github.com/programatta/spaceinvaders/internal/explosion"
 	"github.com/programatta/spaceinvaders/internal/player"
+	"github.com/programatta/spaceinvaders/internal/sounds"
 	"github.com/programatta/spaceinvaders/internal/sprite"
 	"github.com/programatta/spaceinvaders/internal/utils"
 )
@@ -40,6 +41,7 @@ type Collider interface {
 type Game struct {
 	spriteCreator     *sprite.SpriteCreator
 	textFace          *text.GoTextFace
+	soundEffects      *sounds.SoundEffects
 	cannon            *player.Cannon
 	cannonCount       uint8
 	score             uint32
@@ -57,6 +59,7 @@ type Game struct {
 func NewGame() *Game {
 	spriteCreator := sprite.NewSpriteCreator()
 	textFace := utils.LoadEmbeddedFont(8)
+	soundEffects := sounds.NewSoundEffects()
 
 	game := &Game{}
 	game.spriteCreator = spriteCreator
@@ -79,6 +82,7 @@ func NewGame() *Game {
 	game.cannonCount = 3
 	game.score = 0
 	game.innerStateId = playing
+	game.soundEffects = soundEffects
 	return game
 }
 
@@ -115,6 +119,7 @@ func (g *Game) OnCreateCannonBullet(posX, posY float32, color color.Color) {
 	spriteBullet, _ := g.spriteCreator.SpriteByName("bullet")
 	bullet := NewBullet(posX, posY, spriteBullet, color, -1)
 	g.bullets = append(g.bullets, bullet)
+	g.soundEffects.PlayShoot()
 }
 
 func (g *Game) OnCreateAlienBullet(posX, posY float32, color color.Color) {
