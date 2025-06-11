@@ -13,19 +13,21 @@ type Cannon struct {
 	posY         float32
 	originalPosX float32
 	dirX         float32
-	notify       common.Notifier
+	speed        float32
+	notifier     common.Notifier
 	canFired     bool
 	time         float32
 	active       bool
 }
 
-func NewCannon(posX, posY float32, sprite sprite.Sprite, notify common.Notifier) *Cannon {
+func NewCannon(posX, posY float32, sprite sprite.Sprite, notifier common.Notifier) *Cannon {
 	return &Cannon{
 		sprite:       sprite,
 		posX:         posX,
 		posY:         posY,
 		originalPosX: posX,
-		notify:       notify,
+		notifier:     notifier,
+		speed:        60,
 		canFired:     true,
 		active:       true,
 	}
@@ -46,7 +48,7 @@ func (c *Cannon) ProcessKeyEvents() {
 
 		if c.canFired && ebiten.IsKeyPressed(ebiten.KeySpace) {
 			c.canFired = false
-			c.notify.OnCreateCannonBullet(c.posX+6, c.posY, c.sprite.Color)
+			c.notifier.OnCreateCannonBullet(c.posX+6, c.posY, c.sprite.Color)
 		}
 	}
 }
@@ -61,7 +63,7 @@ func (c *Cannon) Update() error {
 			}
 		}
 
-		c.posX += c.dirX
+		c.posX += c.speed * config.Dt * c.dirX
 		if c.posX <= 0 {
 			c.posX = 0
 		} else if c.posX+float32(c.sprite.Image.Bounds().Dx()) >= float32(config.DesignWidth) {
@@ -77,6 +79,10 @@ func (c *Cannon) Draw(screen *ebiten.Image) {
 		opCannon.GeoM.Translate(float64(c.posX), float64(c.posY))
 		screen.DrawImage(c.sprite.Image, opCannon)
 	}
+}
+
+func (c *Cannon) IsActive() bool {
+	return c.active
 }
 
 // Implementación de la interface Collider.

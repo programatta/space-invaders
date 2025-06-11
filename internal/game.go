@@ -241,7 +241,7 @@ func (g *Game) updatePlaying() {
 					}
 				}
 			}
-			if g.checkCollision(bullet, g.cannon) {
+			if g.cannon.IsActive() && g.checkCollision(bullet, g.cannon) {
 				cannonExplosion1Sprite, _ := g.spriteCreator.SpriteByName("cannonExplosion1")
 				cannonExplosion2Sprite, _ := g.spriteCreator.SpriteByName("cannonExplosion2")
 				posX, posY := g.cannon.Position()
