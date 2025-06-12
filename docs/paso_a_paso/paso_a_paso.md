@@ -12,6 +12,8 @@ Cada paso incluye explicaciones técnicas, ejemplos de código, y una rama espec
 |Enemigos|Nave, aliens, colisiones y explosiones| step-05-*|[▶️](./7_enemigos.md)|
 |Victoria y derrota|Estados de juego| step-06-*|[▶️](./8_victoria_y_derrota.md)|
 |Asets empotrados|Fuentes, sonidos y restructuración| step-07-*|[▶️](./9_mejoras_adicionales.md)|
+|Mejoras|Mejoras en nave y colosiones y reestructuración| step-08-*|[▶️](./10_mejoras.md)|
+
 
 > 🔔 **Ramas con asterisco**
 >
