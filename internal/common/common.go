@@ -1,6 +1,10 @@
 package common
 
-import "image/color"
+import (
+	"image/color"
+
+	"github.com/hajimehoshi/ebiten/v2"
+)
 
 type Notifier interface {
 	OnChangeDirection(newDirection float32)
@@ -8,4 +12,13 @@ type Notifier interface {
 	OnCreateAlienBullet(posX, posy float32, color color.Color)
 	OnResetUfo()
 	OnResetCannon()
+}
+
+type Manageer interface {
+	Update()
+	Draw(screen *ebiten.Image)
+}
+
+type Eraser interface {
+	CanRemove() bool
 }

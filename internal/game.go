@@ -19,25 +19,6 @@ import (
 	"github.com/programatta/spaceinvaders/internal/utils"
 )
 
-type Manageer interface {
-	Update()
-	Draw(screen *ebiten.Image)
-}
-
-type Eraser interface {
-	CanRemove() bool
-}
-
-type Explosioner interface {
-	Manageer
-	Eraser
-}
-
-type Collider interface {
-	Rect() (float32, float32, float32, float32)
-	OnCollide()
-}
-
 type Game struct {
 	spriteCreator     *sprite.SpriteCreator
 	textFace          *text.GoTextFace
@@ -51,7 +32,7 @@ type Game struct {
 	enemies           []*enemy.Alien
 	enemiesCurrentDir float32
 	newDirection      float32
-	explosions        []Explosioner
+	explosions        []explosion.Explosioner
 	alienFireTime     float32
 	innerStateId      playInnerStateId
 }
@@ -212,14 +193,14 @@ func (g *Game) updatePlaying() {
 		if bullet.dirY < 0 {
 			//Bala de cañon
 			for _, bunker := range g.bunkers {
-				if g.checkCollision(bullet, bunker) {
+				if common.CheckCollision(bullet, bunker) {
 					if bunker.DoDamage(bullet.posX, bullet.posY, -1) {
 						bullet.OnCollide()
 					}
 				}
 			}
 			for _, enemy := range g.enemies {
-				if g.checkCollision(bullet, enemy) {
+				if common.CheckCollision(bullet, enemy) {
 					bullet.OnCollide()
 					enemy.OnCollide()
 
@@ -231,7 +212,7 @@ func (g *Game) updatePlaying() {
 					g.soundEffects.PlayAlienKilled()
 				}
 			}
-			if g.ufo.IsActive() && g.checkCollision(bullet, g.ufo) {
+			if g.ufo.IsActive() && common.CheckCollision(bullet, g.ufo) {
 				bullet.OnCollide()
 				g.ufo.OnCollide()
 
@@ -245,13 +226,13 @@ func (g *Game) updatePlaying() {
 		} else {
 			//Bala de alien.
 			for _, bunker := range g.bunkers {
-				if g.checkCollision(bullet, bunker) {
+				if common.CheckCollision(bullet, bunker) {
 					if bunker.DoDamage(bullet.posX, bullet.posY, 1) {
 						bullet.OnCollide()
 					}
 				}
 			}
-			if g.cannon.IsActive() && g.checkCollision(bullet, g.cannon) {
+			if g.cannon.IsActive() && common.CheckCollision(bullet, g.cannon) {
 				cannonExplosion1Sprite, _ := g.spriteCreator.SpriteByName("cannonExplosion1")
 				cannonExplosion2Sprite, _ := g.spriteCreator.SpriteByName("cannonExplosion2")
 				posX, posY := g.cannon.Position()
@@ -270,7 +251,7 @@ func (g *Game) updatePlaying() {
 	//Colisines alien con bunker
 	for _, enemy := range g.enemies {
 		for _, bunker := range g.bunkers {
-			if g.checkCollision(enemy, bunker) {
+			if common.CheckCollision(enemy, bunker) {
 				bunker.OnCollide()
 				break
 			}
@@ -293,7 +274,7 @@ func (g *Game) updatePlaying() {
 	}
 
 	if len(g.explosions) > 0 {
-		g.explosions = slices.DeleteFunc(g.explosions, func(explosion Explosioner) bool {
+		g.explosions = slices.DeleteFunc(g.explosions, func(explosion explosion.Explosioner) bool {
 			return explosion.CanRemove()
 		})
 	}
@@ -370,15 +351,6 @@ func (g *Game) drawGameOver(screen *ebiten.Image) {
 	text.Draw(screen, uiYourScoreText, g.textFace, op)
 }
 
-func (g *Game) checkCollision(sourceObj, targetObj Collider) bool {
-	sx0, sy0, sw, sh := sourceObj.Rect()
-	tx0, ty0, tw, th := targetObj.Rect()
-
-	hasCollision := sx0 < tx0+tw && sx0+sw > tx0 && sy0 < ty0+th && sh+sy0 > ty0
-
-	return hasCollision
-}
-
 func (g *Game) reset() {
 	bunkers := createBunkers(g.spriteCreator)
 	enemies := createEnemies(g.spriteCreator, g)
@@ -386,54 +358,8 @@ func (g *Game) reset() {
 	g.enemies = enemies
 	g.bullets = []*Bullet{}
 	g.bunkers = bunkers
-	g.explosions = []Explosioner{}
+	g.explosions = []explosion.Explosioner{}
 	g.enemiesCurrentDir = 1
 	g.newDirection = 1
 	g.alienFireTime = 0
-}
-
-func createBunkers(spriteCreator *sprite.SpriteCreator) []*player.Bunker {
-	bunkerSprite, _ := spriteCreator.SpriteByName("bunker")
-
-	var posX float32 = 27
-	bunkers := []*player.Bunker{}
-	for range 4 {
-		bunker := player.NewBunker(posX, float32(config.DesignHeight-40), bunkerSprite)
-		bunkers = append(bunkers, bunker)
-		posX += float32(bunkerSprite.Image.Bounds().Dx()) + 20
-	}
-	return bunkers
-}
-
-func createEnemies(spriteCreator *sprite.SpriteCreator, notifier common.Notifier) []*enemy.Alien {
-	enemies := []*enemy.Alien{}
-
-	squids := createAlienFormation("squid", 11, 1, 9, 5, 30, 11, 35, spriteCreator, notifier)
-	enemies = append(enemies, squids...)
-
-	crabs := createAlienFormation("crab", 11, 2, 6, 5, 20, 10, 50, spriteCreator, notifier)
-	enemies = append(enemies, crabs...)
-
-	octopuses := createAlienFormation("octopus", 11, 2, 5, 5, 10, 9, 80, spriteCreator, notifier)
-	enemies = append(enemies, octopuses...)
-	return enemies
-}
-
-func createAlienFormation(alienName string, count, rows, offsetX, offsetY, points uint8, initX, initY float32, spriteCreator *sprite.SpriteCreator, notifier common.Notifier) []*enemy.Alien {
-	sprite1, _ := spriteCreator.SpriteByName(fmt.Sprintf("%s1", alienName))
-	sprite2, _ := spriteCreator.SpriteByName(fmt.Sprintf("%s2", alienName))
-	aliens := []*enemy.Alien{}
-
-	posX := initX
-	posY := initY
-	for i := range count * rows {
-		alien := enemy.NewAlien(posX, posY, sprite1, sprite2, points, config.AlienMoveDelay, notifier)
-		aliens = append(aliens, alien)
-		posX += float32(sprite1.Image.Bounds().Dx() + int(offsetX))
-		if i > 0 && (i+1)%count == 0 {
-			posX = initX
-			posY += float32(sprite1.Image.Bounds().Dy() + int(offsetY))
-		}
-	}
-	return aliens
 }
