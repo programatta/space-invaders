@@ -408,71 +408,32 @@ func createBunkers(spriteCreator *sprite.SpriteCreator) []*player.Bunker {
 func createEnemies(spriteCreator *sprite.SpriteCreator, notifier common.Notifier) []*enemy.Alien {
 	enemies := []*enemy.Alien{}
 
-	squids := createSquids(11, 1, 11, 35, spriteCreator, notifier)
+	squids := createAlienFormation("squid", 11, 1, 9, 5, 30, 11, 35, spriteCreator, notifier)
 	enemies = append(enemies, squids...)
 
-	crabs := createCrabs(11, 2, 10, 50, spriteCreator, notifier)
+	crabs := createAlienFormation("crab", 11, 2, 6, 5, 20, 10, 50, spriteCreator, notifier)
 	enemies = append(enemies, crabs...)
 
-	octopuses := createOctopuses(11, 2, 9, 80, spriteCreator, notifier)
+	octopuses := createAlienFormation("octopus", 11, 2, 5, 5, 10, 9, 80, spriteCreator, notifier)
 	enemies = append(enemies, octopuses...)
-
 	return enemies
 }
 
-func createCrabs(count, rows uint8, initX, initY float32, spriteCreator *sprite.SpriteCreator, notifier common.Notifier) []*enemy.Alien {
-	sprite1, _ := spriteCreator.SpriteByName("crab1")
-	sprite2, _ := spriteCreator.SpriteByName("crab2")
-	crabs := []*enemy.Alien{}
+func createAlienFormation(alienName string, count, rows, offsetX, offsetY, points uint8, initX, initY float32, spriteCreator *sprite.SpriteCreator, notifier common.Notifier) []*enemy.Alien {
+	sprite1, _ := spriteCreator.SpriteByName(fmt.Sprintf("%s1", alienName))
+	sprite2, _ := spriteCreator.SpriteByName(fmt.Sprintf("%s2", alienName))
+	aliens := []*enemy.Alien{}
 
 	posX := initX
 	posY := initY
 	for i := range count * rows {
-		crab := enemy.NewAlien(posX, posY, sprite1, sprite2, 20, config.AlienMoveDelay, notifier)
-		crabs = append(crabs, crab)
-		posX += float32(sprite1.Image.Bounds().Dx() + 6)
+		alien := enemy.NewAlien(posX, posY, sprite1, sprite2, points, config.AlienMoveDelay, notifier)
+		aliens = append(aliens, alien)
+		posX += float32(sprite1.Image.Bounds().Dx() + int(offsetX))
 		if i > 0 && (i+1)%count == 0 {
 			posX = initX
-			posY += float32(sprite1.Image.Bounds().Dy() + 5)
+			posY += float32(sprite1.Image.Bounds().Dy() + int(offsetY))
 		}
 	}
-	return crabs
-}
-
-func createOctopuses(count, rows uint8, initX, initY float32, spriteCreator *sprite.SpriteCreator, notifier common.Notifier) []*enemy.Alien {
-	sprite1, _ := spriteCreator.SpriteByName("octopus1")
-	sprite2, _ := spriteCreator.SpriteByName("octopus2")
-	octopuses := []*enemy.Alien{}
-
-	posX := initX
-	posY := initY
-	for i := range count * rows {
-		octopus := enemy.NewAlien(posX, posY, sprite1, sprite2, 10, config.AlienMoveDelay, notifier)
-		octopuses = append(octopuses, octopus)
-		posX += float32(sprite1.Image.Bounds().Dx() + 5)
-		if i > 0 && (i+1)%count == 0 {
-			posX = initX
-			posY += float32(sprite1.Image.Bounds().Dy() + 5)
-		}
-	}
-	return octopuses
-}
-
-func createSquids(count, rows uint8, initX, initY float32, spriteCreator *sprite.SpriteCreator, notifier common.Notifier) []*enemy.Alien {
-	sprite1, _ := spriteCreator.SpriteByName("squid1")
-	sprite2, _ := spriteCreator.SpriteByName("squid2")
-	squids := []*enemy.Alien{}
-
-	posX := initX
-	posY := initY
-	for i := range count * rows {
-		squid := enemy.NewAlien(posX, posY, sprite1, sprite2, 30, config.AlienMoveDelay, notifier)
-		squids = append(squids, squid)
-		posX += float32(sprite1.Image.Bounds().Dx() + 9)
-		if i > 0 && (i+1)%count == 0 {
-			posX = initX
-			posY += float32(sprite1.Image.Bounds().Dy())
-		}
-	}
-	return squids
+	return aliens
 }
