@@ -188,7 +188,17 @@ func (g *Game) updatePlaying() {
 		g.soundEffects.PlayUfo()
 	}
 
+	var enemyIncrementSpeed float32 = 0
+	if len(g.enemies) == 1 {
+		enemyIncrementSpeed = 7
+	} else if 2 <= len(g.enemies) && len(g.enemies) <= 5 {
+		enemyIncrementSpeed = 5
+	} else if 6 <= len(g.enemies) && len(g.enemies) <= 10 {
+		enemyIncrementSpeed = 3
+	}
+
 	for _, enemy := range g.enemies {
+		enemy.IncrementSpeed(enemyIncrementSpeed)
 		enemy.ChangeDirection(g.enemiesCurrentDir)
 		enemy.Update()
 	}
@@ -418,7 +428,7 @@ func createCrabs(count, rows uint8, initX, initY float32, spriteCreator *sprite.
 	posX := initX
 	posY := initY
 	for i := range count * rows {
-		crab := enemy.NewAlien(posX, posY, sprite1, sprite2, 20, notifier)
+		crab := enemy.NewAlien(posX, posY, sprite1, sprite2, 20, config.AlienMoveDelay, notifier)
 		crabs = append(crabs, crab)
 		posX += float32(sprite1.Image.Bounds().Dx() + 6)
 		if i > 0 && (i+1)%count == 0 {
@@ -437,7 +447,7 @@ func createOctopuses(count, rows uint8, initX, initY float32, spriteCreator *spr
 	posX := initX
 	posY := initY
 	for i := range count * rows {
-		octopus := enemy.NewAlien(posX, posY, sprite1, sprite2, 10, notifier)
+		octopus := enemy.NewAlien(posX, posY, sprite1, sprite2, 10, config.AlienMoveDelay, notifier)
 		octopuses = append(octopuses, octopus)
 		posX += float32(sprite1.Image.Bounds().Dx() + 5)
 		if i > 0 && (i+1)%count == 0 {
@@ -456,7 +466,7 @@ func createSquids(count, rows uint8, initX, initY float32, spriteCreator *sprite
 	posX := initX
 	posY := initY
 	for i := range count * rows {
-		squid := enemy.NewAlien(posX, posY, sprite1, sprite2, 30, notifier)
+		squid := enemy.NewAlien(posX, posY, sprite1, sprite2, 30, config.AlienMoveDelay, notifier)
 		squids = append(squids, squid)
 		posX += float32(sprite1.Image.Bounds().Dx() + 9)
 		if i > 0 && (i+1)%count == 0 {

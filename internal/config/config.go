@@ -6,3 +6,6 @@ const WindowWidth int = 642
 const WindowHeight int = 642
 const DesignWidth int = WindowWidth / 3
 const DesignHeight int = WindowHeight / 3
+
+const AlienMoveDelay float32 = 0.35
+const AlienSpeed float32 = 200

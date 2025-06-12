@@ -11,21 +11,23 @@ import (
 )
 
 type Alien struct {
-	sprites       []sprite.Sprite
-	currentSprite uint
-	posX          float32
-	posY          float32
-	score         uint8
-	currentDirX   float32
-	lastDirX      float32
-	time          float32
-	notifier      common.Notifier
-	remove        bool
+	sprites        []sprite.Sprite
+	currentSprite  uint
+	posX           float32
+	posY           float32
+	score          uint8
+	alienMoveDelay float32
+	currentDirX    float32
+	lastDirX       float32
+	time           float32
+	notifier       common.Notifier
+	remove         bool
+	currentDelay   float32
 }
 
-func NewAlien(posX, posY float32, sprite1, sprite2 sprite.Sprite, score uint8, notifier common.Notifier) *Alien {
+func NewAlien(posX, posY float32, sprite1, sprite2 sprite.Sprite, score uint8, alienMoveDelay float32, notifier common.Notifier) *Alien {
 	sprites := []sprite.Sprite{sprite1, sprite2}
-	return &Alien{sprites: sprites, posX: posX, posY: posY, score: score, currentSprite: 0, time: 0, notifier: notifier}
+	return &Alien{sprites: sprites, posX: posX, posY: posY, score: score, alienMoveDelay: alienMoveDelay, currentSprite: 0, time: 0, currentDelay: alienMoveDelay, notifier: notifier}
 }
 
 func (a *Alien) Position() (float32, float32) {
@@ -49,8 +51,8 @@ func (a *Alien) Update() {
 	}
 
 	a.time += config.Dt
-	if a.time >= 0.35 {
-		a.posX += speed * config.Dt * a.currentDirX
+	if a.time >= a.currentDelay {
+		a.posX += config.AlienSpeed * config.Dt * a.currentDirX
 		a.currentSprite = (a.currentSprite + 1) % 2
 		a.time = 0
 	}
@@ -73,6 +75,12 @@ func (a *Alien) Draw(screen *ebiten.Image) {
 
 func (a *Alien) CanRemove() bool {
 	return a.remove
+}
+
+func (a *Alien) IncrementSpeed(incrementSpeed float32) {
+	if incrementSpeed > 0 {
+		a.currentDelay = a.alienMoveDelay / incrementSpeed
+	}
 }
 
 // Implementación de la interface Collider.
@@ -104,5 +112,3 @@ func (a *Alien) Fire() {
 func (a *Alien) Score() uint8 {
 	return a.score
 }
-
-const speed float32 = 200
