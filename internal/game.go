@@ -26,7 +26,7 @@ func NewGame() *Game {
 	game := &Game{}
 
 	game.states = make(map[states.StateId]states.State)
-	game.states[states.Presentation] = presentation.NewPresentationState()
+	game.states[states.Presentation] = presentation.NewPresentationState(spriteCreator, textFace)
 	game.states[states.Play] = play.NewPlayState()
 
 	game.currentState = loader.NewLoaderState(spriteCreator, textFace)
