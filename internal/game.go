@@ -19,8 +19,8 @@ type Game struct {
 }
 
 func NewGame() *Game {
-	_ = sprite.NewSpriteCreator()
-	_ = utils.LoadEmbeddedFont(8)
+	textFace := utils.LoadEmbeddedFont(8)
+	spriteCreator := sprite.NewSpriteCreator()
 	_ = sounds.NewSoundEffects()
 
 	game := &Game{}
@@ -29,7 +29,7 @@ func NewGame() *Game {
 	game.states[states.Presentation] = presentation.NewPresentationState()
 	game.states[states.Play] = play.NewPlayState()
 
-	game.currentState = loader.NewLoaderState()
+	game.currentState = loader.NewLoaderState(spriteCreator, textFace)
 	game.currentStateId = states.Loader
 
 	return game
