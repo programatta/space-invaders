@@ -2,8 +2,10 @@ package presentation
 
 import (
 	"image/color"
+	"os"
 
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/inpututil"
 	"github.com/hajimehoshi/ebiten/v2/text/v2"
 	"github.com/programatta/spaceinvaders/internal/config"
 	"github.com/programatta/spaceinvaders/internal/sprite"
@@ -11,17 +13,21 @@ import (
 )
 
 type PresentationState struct {
-	spriteCreator *sprite.SpriteCreator
-	textFace      *text.GoTextFace
-	nextState     states.StateId
-	time          float32
-	uiTitleText   string
-	uiMisteryText string
-	uiSquidText   string
-	uiCrabText    string
-	uiOctopusText string
-	textIndex     int
-	currentStep   int
+	spriteCreator        *sprite.SpriteCreator
+	textFace             *text.GoTextFace
+	nextState            states.StateId
+	time                 float32
+	uiTitleText          string
+	uiMisteryText        string
+	uiSquidText          string
+	uiCrabText           string
+	uiOctopusText        string
+	textIndex            int
+	currentStep          int
+	pressSpaceTime       float32
+	reloadScreenTime     float32
+	showPressSpaceToPlay bool
+	innerState           presentationInnerStateId
 }
 
 func NewPresentationState(spriteCreator *sprite.SpriteCreator, textFace *text.GoTextFace) *PresentationState {
@@ -29,33 +35,59 @@ func NewPresentationState(spriteCreator *sprite.SpriteCreator, textFace *text.Go
 		spriteCreator: spriteCreator,
 		textFace:      textFace,
 		nextState:     states.Presentation,
+		innerState:    showScores,
 	}
 }
 
-func (ps *PresentationState) ProcessEvents() {}
+func (ps *PresentationState) ProcessEvents() {
+	if inpututil.IsKeyJustReleased(ebiten.KeySpace) {
+		ps.nextState = states.Play
+	}
+
+	if ebiten.IsKeyPressed(ebiten.KeyEscape) {
+		os.Exit(0)
+	}
+}
 
 func (ps *PresentationState) Update() {
-	ps.time += config.Dt
-	if ps.time >= 0.12 {
-		if ps.currentStep == 0 {
-			ps.uiTitleText = ps.typeWriteText(title)
+	switch ps.innerState {
+	case showScores:
+		ps.time += config.Dt
+		if ps.time >= stepDelay {
+			if ps.currentStep == 0 {
+				ps.uiTitleText = ps.typeWriteText(title)
+			}
+			if ps.currentStep == 1 {
+				ps.uiMisteryText = ps.typeWriteText(mistery)
+			}
+			if ps.currentStep == 2 {
+				ps.uiSquidText = ps.typeWriteText(squid)
+			}
+			if ps.currentStep == 3 {
+				ps.uiCrabText = ps.typeWriteText(crab)
+			}
+			if ps.currentStep == 4 {
+				ps.uiOctopusText = ps.typeWriteText(octopus)
+			}
+			if ps.currentStep == 5 {
+				ps.innerState = showToPlay
+			}
+			ps.time = 0
 		}
-		if ps.currentStep == 1 {
-			ps.uiMisteryText = ps.typeWriteText(mistery)
+	case showToPlay:
+		ps.pressSpaceTime += config.Dt
+		if ps.pressSpaceTime >= blinkDelay {
+			ps.pressSpaceTime = 0
+			ps.showPressSpaceToPlay = !ps.showPressSpaceToPlay
 		}
-		if ps.currentStep == 2 {
-			ps.uiSquidText = ps.typeWriteText(squid)
-		}
-		if ps.currentStep == 3 {
-			ps.uiCrabText = ps.typeWriteText(crab)
-		}
-		if ps.currentStep == 4 {
-			ps.uiOctopusText = ps.typeWriteText(octopus)
-		}
-		if ps.currentStep == 5 {
+
+		ps.reloadScreenTime += config.Dt
+		if ps.reloadScreenTime > reloadDelay {
+			ps.uiTitleText = ""
+			ps.reloadScreenTime = 0
 			ps.currentStep = 0
+			ps.innerState = showScores
 		}
-		ps.time = 0
 	}
 }
 
@@ -95,6 +127,14 @@ func (ps *PresentationState) Draw(screen *ebiten.Image) {
 		ps.drawIcon(screen, octopusSprite, lineX+3, lineY)
 		ps.drawText(screen, ps.uiOctopusText, lineX+20, lineY+1, octopusSprite.Color)
 	}
+	if ps.currentStep >= 5 {
+		if ps.showPressSpaceToPlay {
+			widthText, _ := text.Measure(pressToPlay, ps.textFace, 0)
+			playX := float64(config.DesignWidth/2) - widthText/2
+			playY := float64(config.DesignHeight/2 + 50)
+			ps.drawText(screen, pressToPlay, playX, playY, color.White)
+		}
+	}
 }
 
 func (ps *PresentationState) NextState() states.StateId {
@@ -131,3 +171,8 @@ const mistery string = "= ? MISTERY"
 const squid string = "= 30 POINTS"
 const crab string = "= 20 POINTS"
 const octopus string = "= 10 POINTS"
+const pressToPlay string = "PRESS SPACE TO PLAY"
+
+const stepDelay float32 = 0.12  //en segundos.
+const reloadDelay float32 = 5.0 //en segundos.
+const blinkDelay float32 = 0.5  //en segundos.
