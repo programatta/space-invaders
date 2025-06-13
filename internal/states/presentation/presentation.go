@@ -62,40 +62,38 @@ func (ps *PresentationState) Update() {
 func (ps *PresentationState) Draw(screen *ebiten.Image) {
 	screen.Fill(color.RGBA{0x03, 0x04, 0x5e, 0xFF})
 
+	var lineX float64 = 0
+	var lineY float64 = 0
 	if ps.currentStep >= 0 {
 		widthText, _ := text.Measure(title, ps.textFace, 0)
-		titleX := float64(config.DesignWidth/2) - widthText/2
-		titleY := float64(config.DesignHeight/2 - 60)
+		lineX = float64(config.DesignWidth/2) - widthText/2
+		lineY = float64(config.DesignHeight/2 - 60)
 
-		ps.drawText(screen, ps.uiTitleText, titleX, titleY, color.White)
+		ps.drawText(screen, ps.uiTitleText, lineX, lineY, color.White)
+		lineY += 20
 	}
 	if ps.currentStep >= 1 {
-		misteryTextX := float64(config.DesignWidth/2 - 40)
-		misteryTextY := float64(config.DesignHeight/2 - 40)
-
-		ps.drawText(screen, ps.uiMisteryText, misteryTextX, misteryTextY, color.White)
+		ufoSprite, _ := ps.spriteCreator.SpriteByName("ufo")
+		ps.drawIcon(screen, ufoSprite, lineX, lineY)
+		ps.drawText(screen, ps.uiMisteryText, lineX+20, lineY+1, ufoSprite.Color)
+		lineY += 20
 	}
-
 	if ps.currentStep >= 2 {
-		widthText, _ := text.Measure(squid, ps.textFace, 0)
-		squidTextX := float64(config.DesignWidth/2) - widthText/2
-		squidTextY := float64(config.DesignHeight/2 - 20)
-
-		ps.drawText(screen, ps.uiSquidText, squidTextX, squidTextY, color.White)
+		squidSprite, _ := ps.spriteCreator.SpriteByName("squid1")
+		ps.drawIcon(screen, squidSprite, lineX+4, lineY)
+		ps.drawText(screen, ps.uiSquidText, lineX+20, lineY+1, squidSprite.Color)
+		lineY += 20
 	}
 	if ps.currentStep >= 3 {
-		widthText, _ := text.Measure(crab, ps.textFace, 0)
-		crabTextX := float64(config.DesignWidth/2) - widthText/2
-		crabTextY := float64(config.DesignHeight / 2)
-
-		ps.drawText(screen, ps.uiCrabText, crabTextX, crabTextY, color.White)
+		crabSprite, _ := ps.spriteCreator.SpriteByName("crab1")
+		ps.drawIcon(screen, crabSprite, lineX+3, lineY)
+		ps.drawText(screen, ps.uiCrabText, lineX+20, lineY+1, crabSprite.Color)
+		lineY += 20
 	}
 	if ps.currentStep >= 4 {
-		widthText, _ := text.Measure(octopus, ps.textFace, 0)
-		octopusTextX := float64(config.DesignWidth/2) - widthText/2
-		octopusTextY := float64(config.DesignHeight/2 + 20)
-
-		ps.drawText(screen, ps.uiOctopusText, octopusTextX, octopusTextY, color.White)
+		octopusSprite, _ := ps.spriteCreator.SpriteByName("octopus1")
+		ps.drawIcon(screen, octopusSprite, lineX+3, lineY)
+		ps.drawText(screen, ps.uiOctopusText, lineX+20, lineY+1, octopusSprite.Color)
 	}
 }
 
@@ -120,6 +118,12 @@ func (ps *PresentationState) drawText(screen *ebiten.Image, textstr string, posX
 	textOp.GeoM.Translate(posX, posY)
 	textOp.ColorScale.ScaleWithColor(color)
 	text.Draw(screen, textstr, ps.textFace, textOp)
+}
+
+func (ps *PresentationState) drawIcon(screen *ebiten.Image, sprite sprite.Sprite, posX, posY float64) {
+	drawOp := &ebiten.DrawImageOptions{}
+	drawOp.GeoM.Translate(posX, posY)
+	screen.DrawImage(sprite.Image, drawOp)
 }
 
 const title string = "SPACE INVADERS"
