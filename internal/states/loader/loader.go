@@ -26,6 +26,8 @@ func NewLoaderState(spriteCreator *sprite.SpriteCreator, textFace *text.GoTextFa
 	}
 }
 
+func (ls *LoaderState) Start() {}
+
 func (ls *LoaderState) ProcessEvents() {}
 
 func (ls *LoaderState) Update() {

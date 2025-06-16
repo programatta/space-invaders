@@ -34,9 +34,18 @@ func NewPresentationState(spriteCreator *sprite.SpriteCreator, textFace *text.Go
 	return &PresentationState{
 		spriteCreator: spriteCreator,
 		textFace:      textFace,
-		nextState:     states.Presentation,
-		innerState:    showScores,
 	}
+}
+
+func (ps *PresentationState) Start() {
+	ps.nextState = states.Presentation
+	ps.innerState = showScores
+	ps.time = 0
+	ps.pressSpaceTime = 0
+	ps.uiTitleText = ""
+	ps.reloadScreenTime = 0
+	ps.currentStep = 0
+	ps.textIndex = 0
 }
 
 func (ps *PresentationState) ProcessEvents() {

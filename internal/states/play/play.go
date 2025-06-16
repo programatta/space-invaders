@@ -8,7 +8,6 @@ import (
 	"slices"
 
 	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/hajimehoshi/ebiten/v2/inpututil"
 	"github.com/hajimehoshi/ebiten/v2/text/v2"
 	"github.com/programatta/spaceinvaders/internal/config"
 	"github.com/programatta/spaceinvaders/internal/sounds"
@@ -37,6 +36,7 @@ type PlayState struct {
 	alienFireTime     float32
 	innerStateId      playInnerStateId
 	nextState         states.StateId
+	gameOverTime      float32
 }
 
 func NewPlayState(spriteCreator *sprite.SpriteCreator, textFace *text.GoTextFace, soundEffects *sounds.SoundEffects) *PlayState {
@@ -50,24 +50,21 @@ func NewPlayState(spriteCreator *sprite.SpriteCreator, textFace *text.GoTextFace
 	spriteCannon, _ := spriteCreator.SpriteByName("cannon")
 	playState.cannon = player.NewCannon(float32(0), float32(config.DesignHeight-10), spriteCannon, playState)
 
-	bunkers := createBunkers(spriteCreator)
-	playState.bunkers = bunkers
-
 	ufoSprite, _ := spriteCreator.SpriteByName("ufo")
 	ufo := enemy.NewUfo(-20, 15, ufoSprite)
 	playState.ufo = ufo
 
-	enemies := createEnemies(spriteCreator, playState)
-	playState.enemies = enemies
-	playState.enemiesCurrentDir = 1
-	playState.newDirection = 1
-	playState.cannonCount = 3
-	playState.score = 0
-	playState.innerStateId = playing
-
-	playState.nextState = states.Play
-
 	return playState
+}
+
+func (ps *PlayState) Start() {
+	ps.innerStateId = playing
+	ps.nextState = states.Play
+	ps.cannon.Reset()
+	ps.cannonCount = 3
+	ps.score = 0
+	ps.gameOverTime = 0
+	ps.reset()
 }
 
 func (ps *PlayState) ProcessEvents() {
@@ -78,14 +75,15 @@ func (ps *PlayState) ProcessEvents() {
 	switch ps.innerStateId {
 	case playing:
 		ps.processKeyEventPlaying()
-	case gameOver:
-		ps.processKeyEventGameOver()
 	}
 }
 
 func (ps *PlayState) Update() {
-	if ps.innerStateId == playing {
+	switch ps.innerStateId {
+	case playing:
 		ps.updatePlaying()
+	case gameOver:
+		ps.updateGameOver()
 	}
 }
 
@@ -140,17 +138,6 @@ func (ps *PlayState) OnResetCannon() {
 
 func (ps *PlayState) processKeyEventPlaying() {
 	ps.cannon.ProcessKeyEvents()
-}
-
-func (ps *PlayState) processKeyEventGameOver() {
-	if inpututil.IsKeyJustReleased(ebiten.KeySpace) {
-		// resetear el juego.
-		ps.reset()
-		ps.cannon.Reset()
-		ps.cannonCount = 3
-		ps.score = 0
-		ps.innerStateId = playing
-	}
 }
 
 func (ps *PlayState) reset() {
@@ -313,6 +300,14 @@ func (ps *PlayState) updatePlaying() {
 	}
 }
 
+func (ps *PlayState) updateGameOver() {
+	ps.gameOverTime += config.Dt
+	if ps.gameOverTime >= gameOverDelay {
+		ps.gameOverTime = 0
+		ps.nextState = states.Presentation
+	}
+}
+
 // -----------------------------------------------------------------------------
 // Sección de dibujo de pantalla por estado.
 // -----------------------------------------------------------------------------
@@ -373,3 +368,5 @@ func (ps *PlayState) drawGameOver(screen *ebiten.Image) {
 	op.ColorScale.ScaleWithColor(color.White)
 	text.Draw(screen, uiYourScoreText, ps.textFace, op)
 }
+
+const gameOverDelay float32 = 3.0 //en segs.

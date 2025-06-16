@@ -41,6 +41,7 @@ func (g *Game) Update() error {
 	if next != g.currentStateId {
 		g.currentState = g.states[next]
 		g.currentStateId = next
+		g.currentState.Start()
 	}
 	g.currentState.ProcessEvents()
 	g.currentState.Update()

@@ -12,6 +12,7 @@ const (
 
 // State define el comportamiento de un estado de juego
 type State interface {
+	Start()
 	ProcessEvents()
 	Update()
 	Draw(screen *ebiten.Image)
