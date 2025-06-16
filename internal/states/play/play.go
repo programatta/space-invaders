@@ -5,16 +5,25 @@ import (
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
+	"github.com/hajimehoshi/ebiten/v2/text/v2"
+	"github.com/programatta/spaceinvaders/internal/sounds"
+	"github.com/programatta/spaceinvaders/internal/sprite"
 	"github.com/programatta/spaceinvaders/internal/states"
 )
 
 type PlayState struct {
-	nextState states.StateId
+	spriteCreator *sprite.SpriteCreator
+	textFace      *text.GoTextFace
+	soundEffects  *sounds.SoundEffects
+	nextState     states.StateId
 }
 
-func NewPlayState() *PlayState {
+func NewPlayState(spriteCreator *sprite.SpriteCreator, textFace *text.GoTextFace, soundEffects *sounds.SoundEffects) *PlayState {
 	return &PlayState{
-		nextState: states.Play,
+		spriteCreator: spriteCreator,
+		textFace:      textFace,
+		soundEffects:  soundEffects,
+		nextState:     states.Play,
 	}
 }
 

@@ -21,13 +21,13 @@ type Game struct {
 func NewGame() *Game {
 	textFace := utils.LoadEmbeddedFont(8)
 	spriteCreator := sprite.NewSpriteCreator()
-	_ = sounds.NewSoundEffects()
+	soundEffects := sounds.NewSoundEffects()
 
 	game := &Game{}
 
 	game.states = make(map[states.StateId]states.State)
 	game.states[states.Presentation] = presentation.NewPresentationState(spriteCreator, textFace)
-	game.states[states.Play] = play.NewPlayState()
+	game.states[states.Play] = play.NewPlayState(spriteCreator, textFace, soundEffects)
 
 	game.currentState = loader.NewLoaderState(spriteCreator, textFace)
 	game.currentStateId = states.Loader
