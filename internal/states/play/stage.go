@@ -1,13 +1,13 @@
-package internal
+package play
 
 import (
 	"fmt"
 
-	"github.com/programatta/spaceinvaders/internal/common"
 	"github.com/programatta/spaceinvaders/internal/config"
-	"github.com/programatta/spaceinvaders/internal/enemy"
-	"github.com/programatta/spaceinvaders/internal/player"
 	"github.com/programatta/spaceinvaders/internal/sprite"
+	"github.com/programatta/spaceinvaders/internal/states/play/common"
+	"github.com/programatta/spaceinvaders/internal/states/play/enemy"
+	"github.com/programatta/spaceinvaders/internal/states/play/player"
 )
 
 func createBunkers(spriteCreator *sprite.SpriteCreator) []*player.Bunker {

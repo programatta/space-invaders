@@ -2,9 +2,9 @@ package explosion
 
 import (
 	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/programatta/spaceinvaders/internal/common"
 	"github.com/programatta/spaceinvaders/internal/config"
 	"github.com/programatta/spaceinvaders/internal/sprite"
+	"github.com/programatta/spaceinvaders/internal/states/play/common"
 )
 
 type ExplosionCannon struct {

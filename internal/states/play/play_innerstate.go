@@ -1,4 +1,4 @@
-package internal
+package play
 
 type playInnerStateId int
 
