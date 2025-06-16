@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"image/color"
 	"math/rand"
+	"os"
 	"slices"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -70,6 +71,10 @@ func NewPlayState(spriteCreator *sprite.SpriteCreator, textFace *text.GoTextFace
 }
 
 func (ps *PlayState) ProcessEvents() {
+	if ebiten.IsKeyPressed(ebiten.KeyEscape) {
+		os.Exit(0)
+	}
+
 	switch ps.innerStateId {
 	case playing:
 		ps.processKeyEventPlaying()
