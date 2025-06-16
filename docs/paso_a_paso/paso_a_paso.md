@@ -13,6 +13,7 @@ Cada paso incluye explicaciones técnicas, ejemplos de código, y una rama espec
 |Victoria y derrota|Estados de juego| step-06-*|[▶️](./8_victoria_y_derrota.md)|
 |Asets empotrados|Fuentes, sonidos y restructuración| step-07-*|[▶️](./9_mejoras_adicionales.md)|
 |Mejoras|Mejoras en nave y colosiones y reestructuración| step-08-*|[▶️](./10_mejoras.md)|
+|Estados de la aplicación|Estados de loading, presentation y play| step-09-*|[▶️](./11_estados_aplicacion.md)|
 
 
 > 🔔 **Ramas con asterisco**
