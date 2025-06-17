@@ -8,6 +8,7 @@ import (
 	"slices"
 
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/inpututil"
 	"github.com/hajimehoshi/ebiten/v2/text/v2"
 	"github.com/programatta/spaceinvaders/internal/config"
 	"github.com/programatta/spaceinvaders/internal/sounds"
@@ -37,6 +38,8 @@ type PlayState struct {
 	innerStateId      playInnerStateId
 	nextState         states.StateId
 	gameOverTime      float32
+	pauseGameScreen   *ebiten.Image
+	pauseOverlay      *ebiten.Image
 }
 
 func NewPlayState(spriteCreator *sprite.SpriteCreator, textFace *text.GoTextFace, soundEffects *sounds.SoundEffects) *PlayState {
@@ -75,6 +78,8 @@ func (ps *PlayState) ProcessEvents() {
 	switch ps.innerStateId {
 	case playing:
 		ps.processKeyEventPlaying()
+	case pause:
+		ps.processKeyEventPause()
 	}
 }
 
@@ -82,6 +87,8 @@ func (ps *PlayState) Update() {
 	switch ps.innerStateId {
 	case playing:
 		ps.updatePlaying()
+	case pauseRequest:
+		ps.updatePauseRequest()
 	case gameOver:
 		ps.updateGameOver()
 	}
@@ -92,6 +99,10 @@ func (ps *PlayState) Draw(screen *ebiten.Image) {
 	switch ps.innerStateId {
 	case playing:
 		ps.drawPlaying(screen)
+	case pauseRequest:
+		ps.drawPauseRequest(screen)
+	case pause:
+		ps.drawPause(screen)
 	case gameOver:
 		ps.drawGameOver(screen)
 	}
@@ -137,20 +148,20 @@ func (ps *PlayState) OnResetCannon() {
 // -----------------------------------------------------------------------------
 
 func (ps *PlayState) processKeyEventPlaying() {
+	if inpututil.IsKeyJustPressed(ebiten.KeyP) {
+		ps.innerStateId = pauseRequest
+	}
 	ps.cannon.ProcessKeyEvents()
 }
 
-func (ps *PlayState) reset() {
-	bunkers := createBunkers(ps.spriteCreator)
-	enemies := createEnemies(ps.spriteCreator, ps)
-
-	ps.enemies = enemies
-	ps.bullets = []*Bullet{}
-	ps.bunkers = bunkers
-	ps.explosions = []explosion.Explosioner{}
-	ps.enemiesCurrentDir = 1
-	ps.newDirection = 1
-	ps.alienFireTime = 0
+func (ps *PlayState) processKeyEventPause() {
+	if inpututil.IsKeyJustPressed(ebiten.KeyP) {
+		ps.innerStateId = playing
+		ps.pauseGameScreen.Deallocate()
+		ps.pauseGameScreen = nil
+		ps.pauseOverlay.Deallocate()
+		ps.pauseOverlay = nil
+	}
 }
 
 // -----------------------------------------------------------------------------
@@ -300,6 +311,12 @@ func (ps *PlayState) updatePlaying() {
 	}
 }
 
+func (ps *PlayState) updatePauseRequest() {
+	if ps.pauseGameScreen != nil {
+		ps.innerStateId = pause
+	}
+}
+
 func (ps *PlayState) updateGameOver() {
 	ps.gameOverTime += config.Dt
 	if ps.gameOverTime >= gameOverDelay {
@@ -347,6 +364,36 @@ func (ps *PlayState) drawPlaying(screen *ebiten.Image) {
 
 }
 
+func (ps *PlayState) drawPauseRequest(screen *ebiten.Image) {
+	ps.drawPlaying(screen)
+	ps.pauseGameScreen = ebiten.NewImageFromImage(screen)
+	rect := ps.pauseGameScreen.Bounds()
+	ps.pauseOverlay = ebiten.NewImage(rect.Dx(), rect.Dy())
+	ps.pauseOverlay.Fill(color.RGBA{0x0A, 0x0A, 0x0A, 0xAA})
+}
+
+func (ps *PlayState) drawPause(screen *ebiten.Image) {
+	opPauseGameScreen := &ebiten.DrawImageOptions{}
+	opPauseGameScreen.GeoM.Translate(0, 0)
+
+	opPauseOverlay := &ebiten.DrawImageOptions{}
+	opPauseOverlay.GeoM.Translate(0, 0)
+
+	uiPauseText := "PAUSE"
+	widthText, heightText := text.Measure(uiPauseText, ps.textFace, 0)
+	pauseX := float64(config.DesignWidth/2) - widthText
+	pauseY := float64(config.DesignWidth/2) - heightText
+
+	opPause := &text.DrawOptions{}
+	opPause.GeoM.Scale(2.0, 2.0)
+	opPause.GeoM.Translate(pauseX, pauseY)
+	opPause.ColorScale.ScaleWithColor(color.White)
+	text.Draw(ps.pauseOverlay, uiPauseText, ps.textFace, opPause)
+
+	screen.DrawImage(ps.pauseGameScreen, opPauseGameScreen)
+	screen.DrawImage(ps.pauseOverlay, opPauseOverlay)
+}
+
 func (ps *PlayState) drawGameOver(screen *ebiten.Image) {
 	uiGameOverText := "GAME OVER"
 	widthText, _ := text.Measure(uiGameOverText, ps.textFace, 0)
@@ -367,6 +414,19 @@ func (ps *PlayState) drawGameOver(screen *ebiten.Image) {
 	op.GeoM.Translate(yourScoreX, yourScoreY)
 	op.ColorScale.ScaleWithColor(color.White)
 	text.Draw(screen, uiYourScoreText, ps.textFace, op)
+}
+
+func (ps *PlayState) reset() {
+	bunkers := createBunkers(ps.spriteCreator)
+	enemies := createEnemies(ps.spriteCreator, ps)
+
+	ps.enemies = enemies
+	ps.bullets = []*Bullet{}
+	ps.bunkers = bunkers
+	ps.explosions = []explosion.Explosioner{}
+	ps.enemiesCurrentDir = 1
+	ps.newDirection = 1
+	ps.alienFireTime = 0
 }
 
 const gameOverDelay float32 = 3.0 //en segs.
