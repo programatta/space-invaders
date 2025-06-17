@@ -338,7 +338,7 @@ El canal alfa es ofrecido por `ColorScale.ScaleAlpha(a float32)` con valores de 
 
 Hay que tener en cuenta que no es conmutativa la operación `GeoM.Translate()` con `GeoM.Scale()`. Si se hace primero el escalado, los valores de translación serán diferentes.
 
-<Imagen con texto e imagen de alien>
+![Estado loader con textos e imagen de alien](../images/paso_a_paso_09_estado_loader_imagen_textos.png)
 
 Finalizamos añadiendo la funcionalidad de retardo para realizar el cambio de estado. Dejamos un segundo y medio aproximadamente para pasar al estado de presentación (**Presentation**).
 
