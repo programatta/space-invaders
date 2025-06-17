@@ -15,6 +15,7 @@ Cada paso incluye explicaciones técnicas, ejemplos de código, y una rama espec
 |Mejoras|Mejoras en nave y colosiones y reestructuración| step-08-*|[▶️](./10_mejoras.md)|
 |Estados de la aplicación|Estados de loading, presentation y play| step-09-*|[▶️](./11_estados_aplicacion.md)|
 |Mejoras|Desde estado play salir de juego, pausarlo y desde game over ir a estado presentation| step-10-*|[▶️](./12_mejoras_2.md)|
+|Binarios y publicación|Generar binarios para desktop y web y distribuirlos||[▶️](./13_binarios_distribucion.md)|
 
 
 > 🔔 **Ramas con asterisco**
