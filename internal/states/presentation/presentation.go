@@ -2,12 +2,12 @@ package presentation
 
 import (
 	"image/color"
-	"os"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
 	"github.com/hajimehoshi/ebiten/v2/text/v2"
 	"github.com/programatta/spaceinvaders/internal/config"
+	"github.com/programatta/spaceinvaders/internal/platform"
 	"github.com/programatta/spaceinvaders/internal/sprite"
 	"github.com/programatta/spaceinvaders/internal/states"
 )
@@ -54,7 +54,7 @@ func (ps *PresentationState) ProcessEvents() {
 	}
 
 	if ebiten.IsKeyPressed(ebiten.KeyEscape) {
-		os.Exit(0)
+		platform.ExitGame()
 	}
 }
 
