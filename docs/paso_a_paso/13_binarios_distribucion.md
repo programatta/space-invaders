@@ -1,6 +1,7 @@
 # Paso 11: Binario y publicación.
 En este paso aprenderás:
 * Cómo generar binarios multiplataforma (nativo y WebAssembly) desde un proyecto en Go.
+* Como aplicar build tags para separar código por plataforma.
 * Cómo empaquetar la versión WebAssembly en un .zip adecuado para distribución.
 * Cómo subir y publicar tu juego en plataformas como itch.io de forma sencilla.
 
@@ -23,7 +24,7 @@ La variable **GOOS** define el sistema operativo sobre el que se genera el binar
 Los valores más usados son:
 * **linux**: para la mayoria de los sistemas operativos basados en linux.
 * **windows**: para Microsoft Windows.
-* **darwing**: para MacOS e iOS.
+* **darwin**: para MacOS e iOS.
 * **js**: para WebAssembly (este valor va en conjunción con GOARCH=wasm).
 
 ### La variable GOARCH (Go Architecture).
@@ -96,7 +97,88 @@ Se requiere del fichero **wasm_exec.js** que se encuentra en **GOROOT/lib/wasm/*
 
 De esta forma ya podemos generar binarios distribuibles para **linux**, **windows** y **web**. Para **MacOS** deberemos disponer de una máquina **MacOS**. 
 
-Para facilitarnos las cosas, podemos usar un **Makefile**, al igual que en proyectos de **C** y **C++**. El fichero **Makefile** se encuentra en el raiz del proyecto, y una breve descripción en el Apendice II. Compilación y ejecución.
+Para facilitarnos las cosas, podemos usar un **Makefile**, al igual que en proyectos de **C** y **C++**. El fichero **Makefile** se encuentra en el raiz del proyecto, y una breve descripción en [**Compilación y ejecución**](../compilation.md).
+
+
+### El problema de la multiplataforma.
+Con los pasos anteriores, ya hemos podido crear binarios para diferentes plataformas, y vemos nuestro juego funcionando en **Linux**, **Windows** y **Navegadores web**. 
+
+Pero, tenemos un problema, y es que disponemos de salida del juego cuando presionamos la **tecla Escape**, tanto en el estado de **Presentation** como en el estado de **Play**. No presenta ningún problema en desktop, es decir, en **Linux** y **Windows**, pero en los navegadores se queda congelado el juego debido a un error.
+
+Para evitar esto, vamos a hacer uso de las **build tags** que ofrece **Go**.
+
+#### Build tags.
+Las **build tags** de **Go** funcionan de forma similar a las **directivas de preprocesador** usadas en **C/C++**, pero de una forma más controlada y estructurada.
+
+Son comentarios especiales que se añaden a comienzo del fichero **.go** para indicarle al compilador cuando incluir ese archivo en la compilación.
+Se colocan antes de **package** sin comentarios entre ellas.
+
+>🔔 **Nota.**
+>
+>Los **build tags** se aplican a nivel de archivo, no dentro del código como se puede hacer con las directivas de preprocesador de C/C++ **`#ifdef`**.
+
+##### Cómo se indican en el código.
+* Para versiones **1.16** se especifica como **`// +build linux`** (p.e: compila el fichero para sistemas linux).
+* Para versiones **1.17 y superiores** se especifica como **`//go:build linux`**.
+
+>🔔 **Nota.**
+>
+>Se pueden usar ambas para mantener compatibilidad con  versiones antiguas del compilador.
+
+#### ¿Cómo se usan al compilar?
+Si fueran personalizadas, usaríamos el parámetro **-tags=<etiqueta>**, si son estandar no es necesario indicar el parámetro **-tags**.
+
+Para solventar el problema detectado, creamos en **internal** un nuevo paquete llamado **platform** que tendrá funcionalidad por plataforma (desktop y browser). Creamos dos ficheros que tengan la función de salida, uno con implementación y otro sin ella.
+
+##### platform/exit_desktop.go
+~~~go
+//go:build !js && !wasm
+
+package platform
+
+import "os"
+
+func ExitGame() {
+  os.Exit(0)
+}
+~~~
+
+##### platform/exit_wasm.go
+~~~go
+//go:build js && wasm
+
+package platform
+
+func ExitGame() {
+  //Aquí no hacemos nada, ya que no podemos cerrar la pestaña o ventana
+  //del navegador.
+}
+~~~
+
+##### states/presentation/presentation.go
+~~~go
+func (ps *PresentationState) ProcessEvents() {
+  ...
+  if ebiten.IsKeyPressed(ebiten.KeyEscape) {
+    platform.ExitGame()
+  }
+}
+~~~
+
+##### states/play/play.go
+~~~go
+func (ps *PlayState) ProcessEvents() {
+  if ebiten.IsKeyPressed(ebiten.KeyEscape) {
+    platform.ExitGame()
+  }
+  ...
+}
+~~~
+
+Con esta funcionalidad solucionamos el problema detectado en la salida del juego en los navegadores. Al hacer uso de GOOS=js GOARCH=wasm **Go** las va a tratar como **build tags** estándar.
+
+Puede consultar el código de este paso en la rama [step-11-binario_publicacion_1](https://github.com/programatta/space-invaders/tree/step-11-binario_publicacion_1).
+
 
 ## Publicación.
 Una vez dispongamos de los binarios, podemos distribuirlos de forma sencilla. En el caso de la versión web (WebAssembly), necesitaremos configurar un servidor web o bien usar una plataforma como **itch.io**, que permite publicar juegos web de forma gratuita.
