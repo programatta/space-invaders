@@ -55,7 +55,7 @@ GOOS=windows GOARCH=amd64 go build -o bin/spaceinvaders.exe main.go
 ~~~
 
 #### Compilar para MacOS/iOS.
-Al usar **Ebiten** librerías basadas en **OpenGL** como **GLFW**, y tener que ser compiladas nativamente para poder usar los bindings en C, se requiere de un ordenador con MacOS.
+Al usar **Ebiten**, este usa librerías basadas en **OpenGL** como **GLFW**, y tener que ser compiladas nativamente para poder usar los bindings en C, se requiere de un ordenador con MacOS.
 
 Se puede usar un compilador cruzado (como **osxcross**) y habilitar **Cgo**, pero esto puede ser un proceso complejo ya que se necesita descargar todo el SDK de MacOS y toolchains de Xcode, por lo que lo mas sencillo es usar una máquina MacOS.
 
@@ -93,7 +93,7 @@ GOOS=js GOARCH=wasm go build -buildvcs=false -o bin/web/spaceinvaders.wasm githu
 </html>
 ~~~
 
-Se requiere del fichero **wasm_exec.js** que se encuentra en **GOROOT/lib/wasm/** y lo debemos de copiar en **bin/web**.
+Se requiere del fichero **wasm_exec.js**, que se encuentra en **GOROOT/lib/wasm/** y lo debemos de copiar en **bin/web**.
 
 De esta forma ya podemos generar binarios distribuibles para **linux**, **windows** y **web**. Para **MacOS** deberemos disponer de una máquina **MacOS**. 
 
